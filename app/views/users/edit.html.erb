@@ -58,6 +58,7 @@
     <div class="last column span-18">
       <%= f.text_area(:description, :label => "Tell everyone a little about yourself") %>
       <%= f.select(:gender,User::USER_GENDER, {:prompt => 'Select gender'}) %>
+      <%= f.select(:year_of_birth,(1900..Time.now.year).to_a.map{|i| [i,i]}, {:prompt => 'Select birth year'}) %>
     </div>
     <div id="preferencescol" class="column span-9 stacked">
       <h3>Email Settings</h3>
