@@ -179,6 +179,11 @@ describe User do
       end
     end
   end
+  it "disallows illegitimate gender" do
+    u = create_user(:name => 'test user')
+    u.update_attributes(:gender => 'hermaphridite')
+    u.errors.on(:gender).should_not be_nil
+  end
 
   it 'resets password' do
     user = User.make!
