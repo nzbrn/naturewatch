@@ -57,6 +57,7 @@
     </div>
     <div class="last column span-18">
       <%= f.text_area(:description, :label => "Tell everyone a little about yourself") %>
+      <%= f.select(:gender,User::USER_GENDER, {:prompt => 'Select gender'}) %>
     </div>
     <div id="preferencescol" class="column span-9 stacked">
       <h3>Email Settings</h3>
