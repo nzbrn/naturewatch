@@ -184,6 +184,11 @@ describe User do
     u.update_attributes(:gender => 'hermaphridite')
     u.errors.on(:gender).should_not be_nil
   end
+  it "disallows illegitimate birth years" do
+    u = create_user(:name => 'test user')
+    u.update_attributes(:year_of_birth => 1800)
+    u.errors.on(:year_of_birth).should_not be_nil
+  end
 
   it 'resets password' do
     user = User.make!
