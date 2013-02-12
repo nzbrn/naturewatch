@@ -12227,7 +12227,8 @@ CREATE TABLE users (
     suspension_reason character varying(255),
     icon_updated_at timestamp without time zone,
     uri character varying(255),
-    gender character varying(255)
+    gender character varying(255),
+    year_of_birth integer
 );
 
 
@@ -14587,6 +14588,8 @@ INSERT INTO schema_migrations (version) VALUES ('20120123001206');
 INSERT INTO schema_migrations (version) VALUES ('20120123190202');
 
 INSERT INTO schema_migrations (version) VALUES ('20120213223810');
+
+INSERT INTO schema_migrations (version) VALUES ('20120214004234');
 
 INSERT INTO schema_migrations (version) VALUES ('20120214200727');
 

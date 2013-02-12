@@ -119,11 +119,12 @@ class User < ActiveRecord::Base
   validates_uniqueness_of   :email,    :allow_blank => true
   
   validates_inclusion_of    :gender, :in => USER_GENDER, :message => "%{value} is not a valid gender", :allow_blank => true
+  validates_inclusion_of    :year_of_birth, :in => (1900..Time.now.year), :message => "must be between 1900 and this year", :allow_blank => true
 
   # HACK HACK HACK -- how to do attr_accessible from here?
   # prevents a user from submitting a crafted form that bypasses activation
   # anything else you want your user to change should be added here.
-  attr_accessible :login, :email, :name, :password, :password_confirmation, :icon, :description, :time_zone, :icon_url, :gender
+  attr_accessible :login, :email, :name, :password, :password_confirmation, :icon, :description, :time_zone, :icon_url, :gender, :year_of_birth
   
   scope :order_by, Proc.new { |sort_by, sort_dir|
     sort_dir ||= 'DESC'
