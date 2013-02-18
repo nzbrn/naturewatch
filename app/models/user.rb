@@ -82,6 +82,7 @@ class User < ActiveRecord::Base
   has_many :updates, :foreign_key => :subscriber_id, :dependent => :delete_all
 
   before_validation :download_remote_icon, :if => :icon_url_provided?
+  before_validation :update_name
   before_validation :strip_name
   before_save :whitelist_licenses
   after_save :update_observation_licenses
@@ -124,7 +125,7 @@ class User < ActiveRecord::Base
   # HACK HACK HACK -- how to do attr_accessible from here?
   # prevents a user from submitting a crafted form that bypasses activation
   # anything else you want your user to change should be added here.
-  attr_accessible :login, :email, :name, :password, :password_confirmation, :icon, :description, :time_zone, :icon_url, :gender, :year_of_birth
+  attr_accessible :login, :email, :name, :password, :password_confirmation, :icon, :description, :time_zone, :icon_url, :gender, :year_of_birth, :first_name, :last_name
   
   scope :order_by, Proc.new { |sort_by, sort_dir|
     sort_dir ||= 'DESC'
@@ -173,6 +174,10 @@ class User < ActiveRecord::Base
     return true unless name
     self.name = name.gsub(/[\s\n\t]+/, ' ').strip
     true
+  end
+
+  def update_name
+    self.name = [first_name, last_name].join(' ').strip
   end
   
   def whitelist_licenses
@@ -358,10 +363,14 @@ class User < ActiveRecord::Base
     autogen_login = User.suggest_login(email.split('@').first) if autogen_login.blank? && !email.blank?
     autogen_login = User.suggest_login('naturalist') if autogen_login.blank?
     autogen_pw = SecureRandom.hex(6) # autogenerate a random password (or else validation fails)
+    fn = auth_info["user_info"]["first_name"] || auth_info["user_info"]["name"].split[0]
+    ln = auth_info["user_info"]["last_name"] || auth_info["user_info"]["name"].split[1]
     u = User.new(
       :login => autogen_login,
       :email => email,
       :name => auth_info["info"]["name"],
+      :first_name => fn,
+      :last_name => ln,
       :password => autogen_pw,
       :password_confirmation => autogen_pw,
       :icon_url => auth_info["info"]["image"]
