@@ -10949,6 +10949,39 @@ ALTER SEQUENCE passwords_id_seq OWNED BY passwords.id;
 
 
 --
+-- Name: phone_numbers; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE phone_numbers (
+    id integer NOT NULL,
+    label character varying(255),
+    number character varying(255),
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: phone_numbers_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE phone_numbers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: phone_numbers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE phone_numbers_id_seq OWNED BY phone_numbers.id;
+
+
+--
 -- Name: photos; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -12580,6 +12613,13 @@ ALTER TABLE ONLY passwords ALTER COLUMN id SET DEFAULT nextval('passwords_id_seq
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY phone_numbers ALTER COLUMN id SET DEFAULT nextval('phone_numbers_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY photos ALTER COLUMN id SET DEFAULT nextval('photos_id_seq'::regclass);
 
 
@@ -13075,6 +13115,14 @@ ALTER TABLE ONLY observations
 
 ALTER TABLE ONLY passwords
     ADD CONSTRAINT passwords_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: phone_numbers_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY phone_numbers
+    ADD CONSTRAINT phone_numbers_pkey PRIMARY KEY (id);
 
 
 --
@@ -14599,6 +14647,8 @@ INSERT INTO schema_migrations (version) VALUES ('20120214200727');
 INSERT INTO schema_migrations (version) VALUES ('20120214213336');
 
 INSERT INTO schema_migrations (version) VALUES ('20120214214138');
+
+INSERT INTO schema_migrations (version) VALUES ('20120215023943');
 
 INSERT INTO schema_migrations (version) VALUES ('20120413012920');
 
