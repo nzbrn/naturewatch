@@ -10,6 +10,36 @@
 <!--[if lt IE 7]>
   <%= stylesheet_link_tag 'blueprint/ie' %>
 <![endif]-->
+<!-- autocomplete javascript -->
+<script src="//maps.googleapis.com/maps/api/js?sensor=false&&region=NZ&libraries=places" type="text/javascript"></script>
+<script type="text/javascript">
+  function initialize_autocomplete() {
+    $('#user_address').before('<div><input id="address_search" type="text" style="width: 225px;" class="text" /> <img src="/images/powered-by-google.png" alt="Powered by Google" style="vertical-align: text-bottom;" /></div>');
+    $('#address_search').keypress(function(e) {
+      if (e.which == 13) {
+        e.preventDefault();
+        return false;
+      }
+    });
+    var input = document.getElementById('address_search');
+    // default bounds are for new zealand
+    var defaultBounds = new google.maps.LatLngBounds(
+      new google.maps.LatLng(-47.783635,163.081055),
+      new google.maps.LatLng(-33.027088,-178.022461)
+    );
+
+    var options = {
+      bounds: defaultBounds
+    };
+    var autocomplete = new google.maps.places.Autocomplete(input,options);
+    google.maps.event.addListener(autocomplete, 'place_changed', function() {
+      var place = autocomplete.getPlace();
+      $("#user_address").val(place.formatted_address.split(', ').join("\n"));
+      $('#address_search').val('');
+    });
+  }
+  google.maps.event.addDomListener(window, 'load', initialize_autocomplete);
+</script>
 <% end -%>
 <% content_for(:extrajs) do %>
   <script type="text/javascript" charset="utf-8">
@@ -58,6 +88,7 @@
     </div>
     <div class="last column span-18">
       <%= f.text_area(:description, :label => "Tell everyone a little about yourself") %>
+      <%= f.text_area(:address) %>
       <%= f.select(:gender,User::USER_GENDER, {:prompt => 'Select gender'}) %>
       <%= f.select(:year_of_birth,(1900..Time.now.year).to_a.map{|i| [i,i]}, {:prompt => 'Select birth year'}) %>
     </div>
