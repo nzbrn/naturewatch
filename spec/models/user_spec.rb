@@ -189,6 +189,15 @@ describe User do
     u.update_attributes(:year_of_birth => 1800)
     u.errors.on(:year_of_birth).should_not be_nil
   end
+  it "updates the name variable with firstname and lastname" do
+    u = create_user(:name => 'test user')
+    u.update_attributes(:first_name => 'first')
+    u.name.should == 'first'
+    u.first_name.should == 'first'
+    u.update_attributes(:last_name => 'last')
+    u.name.should == 'first last'
+    u.last_name.should == 'last'
+  end
 
   it 'resets password' do
     user = User.make!
