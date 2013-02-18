@@ -12228,7 +12228,9 @@ CREATE TABLE users (
     icon_updated_at timestamp without time zone,
     uri character varying(255),
     gender character varying(255),
-    year_of_birth integer
+    year_of_birth integer,
+    first_name character varying(255),
+    last_name character varying(255)
 );
 
 
@@ -14592,6 +14594,8 @@ INSERT INTO schema_migrations (version) VALUES ('20120213223810');
 INSERT INTO schema_migrations (version) VALUES ('20120214004234');
 
 INSERT INTO schema_migrations (version) VALUES ('20120214200727');
+
+INSERT INTO schema_migrations (version) VALUES ('20120214213336');
 
 INSERT INTO schema_migrations (version) VALUES ('20120413012920');
 
