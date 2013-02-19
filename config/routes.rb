@@ -65,6 +65,8 @@ Inaturalist::Application.routes.draw do
       get 'leaderboard(/:year(/:month))' => :leaderboard, :as => 'leaderboard_for'
     end
   end
+
+  match '/users/:id/toggle_deceased' => 'users#toggle_deceased', :as => :toggle_deceased_user, :constraints => { :id => /\d+/ }
   match '/users/:id/suspend' => 'users#suspend', :as => :suspend_user, :constraints => { :id => /\d+/ }
   match '/users/:id/unsuspend' => 'users#unsuspend', :as => :unsuspend_user, :constraints => { :id => /\d+/ }
   match 'users/:id/add_role' => 'users#add_role', :as => :add_role, :constraints => { :id => /\d+/ }, :method => :post
