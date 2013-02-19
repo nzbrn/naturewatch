@@ -1,9 +1,9 @@
 class UsersController < ApplicationController  
   before_filter :authenticate_user!, :except => [:index, :show, :new, :create, :activate, :relationships]
   before_filter :find_user, :only => [:suspend, :unsuspend, :destroy, :purge, 
-    :show, :edit, :update, :relationships, :add_role, :remove_role]
+    :show, :edit, :update, :relationships, :add_role, :remove_role, :toggle_deceased]
   before_filter :ensure_user_is_current_user_or_admin, :only => [:edit, :update, :destroy, :suspend, :unsuspend]
-  before_filter :admin_required, :only => [:curation]
+  before_filter :admin_required, :only => [:curation, :toggle_deceased]
   before_filter :return_here, :only => [:index, :show, :relationships, :dashboard, :curation]
   
   MOBILIZED = [:show, :dashboard, :new, :create]
@@ -368,6 +368,12 @@ class UsersController < ApplicationController
         @observations = @display_user.observations.order("id desc").limit(10)
       end
     end
+  end
+
+
+  def toggle_deceased
+    @user.toggle_deceased
+    redirect_to curate_users_path(:id => @user), :notice => "Successfully updated #{@user.login} to be #{@user.deceased? ? "deceased" : "alive" }" and return
   end
 
 protected

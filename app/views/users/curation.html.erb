@@ -59,6 +59,11 @@
         <li>
           <%= link_to "Log in as #{@display_user.login}", :controller => "admin", :action => "login_as", :id => @display_user.id %>
         </li>
+
+        <li>
+          <%= link_to "Mark user as #{@display_user.deceased? ? "alive" : "deceased"}", toggle_deceased_user_path(@display_user) %>
+        </li>
+
         <li>
           <strong><%= link_to "Manage / delete content", admin_user_content_path(@display_user.id) %></strong>
         </li>

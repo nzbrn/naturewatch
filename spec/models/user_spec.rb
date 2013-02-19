@@ -198,6 +198,14 @@ describe User do
     u.name.should == 'first last'
     u.last_name.should == 'last'
   end
+  it "should toggle deceased status" do
+    u = create_user(:name => 'test user')
+    u.deceased.should == false
+    u.toggle_deceased
+    u.deceased.should == true
+    u.toggle_deceased
+    u.deceased.should == false
+  end
 
   it 'resets password' do
     user = User.make!
