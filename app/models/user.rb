@@ -182,7 +182,12 @@ class User < ActiveRecord::Base
   def update_name
     self.name = [first_name, last_name].join(' ').strip
   end
-  
+
+  def toggle_deceased
+    self.deceased = !deceased?
+    self.save
+  end
+
   def whitelist_licenses
     unless preferred_observation_license.blank? || Observation::LICENSE_CODES.include?(preferred_observation_license)
       self.preferred_observation_license = nil

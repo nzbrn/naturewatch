@@ -12264,7 +12264,8 @@ CREATE TABLE users (
     year_of_birth integer,
     first_name character varying(255),
     last_name character varying(255),
-    address text
+    address text,
+    deceased boolean DEFAULT false
 );
 
 
@@ -14649,6 +14650,8 @@ INSERT INTO schema_migrations (version) VALUES ('20120214213336');
 INSERT INTO schema_migrations (version) VALUES ('20120214214138');
 
 INSERT INTO schema_migrations (version) VALUES ('20120215023943');
+
+INSERT INTO schema_migrations (version) VALUES ('20120215204640');
 
 INSERT INTO schema_migrations (version) VALUES ('20120413012920');
 
