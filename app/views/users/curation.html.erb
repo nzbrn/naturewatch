@@ -45,6 +45,13 @@
         <% else %>
           <li><%= link_to "Make curator", add_role_path(@display_user, :role => "curator"), :method => :post %></li>
         <% end %>
+
+        <% if @display_user.is_pro? %>
+          <li><%= link_to "Remove pro status", remove_role_path(@display_user, :role => "pro"), :method => :delete %></li>
+        <% else %>
+          <li><%= link_to "Make pro", add_role_path(@display_user, :role => "pro"), :method => :post %></li>
+        <% end %>
+
         <li>
           <% if @display_user.active? %>
             <%= link_to "Suspend user", suspend_user_path(@display_user) %>
