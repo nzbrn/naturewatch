@@ -128,8 +128,13 @@ class User < ActiveRecord::Base
   # HACK HACK HACK -- how to do attr_accessible from here?
   # prevents a user from submitting a crafted form that bypasses activation
   # anything else you want your user to change should be added here.
-  attr_accessible :login, :email, :name, :password, :password_confirmation, :icon, :description, :time_zone, :icon_url, :gender, :year_of_birth, :first_name, :last_name, :address, :phone_numbers_attributes
-  
+  attr_accessible :login, :email, :name, :password, :password_confirmation, :icon, :description, :time_zone, :icon_url, :gender, :year_of_birth, :first_name, :last_name, :address, :phone_numbers_attributes, :expertise
+ 
+  serialize :expertise, Hash
+
+  EXPERTISE_LEVELS = %w(learner know_common_species know_most_species expert)
+  EXPERTISE_CATEGORIES = %w(bird freshwater_invertebrate fish fungi lizard_or_frog mammal marine_invertebrate plant terrestrial_invertebrate)
+     
   scope :order_by, Proc.new { |sort_by, sort_dir|
     sort_dir ||= 'DESC'
     order("? ?", sort_by, sort_dir)
@@ -278,7 +283,16 @@ class User < ActiveRecord::Base
   def friends_with?(user)
     friends.exists?(user)
   end
-  
+
+  # Get the expertise level for a category from the expertise hash
+  def expertise_for(category)
+    if expertise && expertise.include?(category)
+      expertise[category]
+    else
+      ''
+    end
+  end 
+
   def picasa_client
     return nil unless picasa_identity
     @picasa_client ||= Picasa.new(self.picasa_identity.token)
