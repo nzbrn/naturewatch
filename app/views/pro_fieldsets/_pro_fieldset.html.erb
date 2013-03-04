@@ -1,0 +1,70 @@
+<div class="pro_observation_fields">
+  <br clear="all" />
+  <h3>Pro Fields</h3>
+  <% if !pro_fieldset.second_hand.nil? %>
+    <div>
+      <label>Second Hand</label>
+      <span class="pro_field_value"><%=pro_fieldset.second_hand %></span>
+    </div>
+  <% end %>
+  <% if !pro_fieldset.uncertain.nil? %>
+    <div>
+    <label>Uncertain</label>
+    <span class="pro_field_value"><%=pro_fieldset.uncertain %></span>
+    </div>
+  <% end %>
+  <% if !pro_fieldset.escaped.nil? %>
+    <div>
+    <label>Escaped</label>
+    <span class="pro_field_value"><%=pro_fieldset.escaped %></span>
+    </div>
+  <% end %>
+  <% if !pro_fieldset.planted.nil? %>
+    <div>
+    <label>Planted</label>
+    <span class="pro_field_value"><%=pro_fieldset.planted %></span>
+    </div>
+  <% end %>
+  <% if !pro_fieldset.ecologically_significant.nil? %>
+    <div>
+    <label>Ecologically Significant</label>
+    <span class="pro_field_value"><%=pro_fieldset.ecologically_significant %></span>
+    </div>
+  <% end %>
+  <% if !pro_fieldset.observation_method.blank? %>
+    <div>
+    <label>Observation Method</label>
+    <span class="pro_field_value"><%=pro_fieldset.observation_method %></span>
+    </div>
+  <% end %>
+  <% if !pro_fieldset.host_name.blank? %>
+    <div>
+    <label>Host Name</label>
+    <span class="pro_field_value"><%=pro_fieldset.host_name %></span>
+    </div>
+  <% end %>
+  <% if !pro_fieldset.habitat.blank? %>
+    <div>
+    <label>Habitat</label>
+    <span class="pro_field_value"><%=pro_fieldset.habitat %></span>
+    </div>
+  <% end %>
+  <% if !pro_fieldset.substrate.blank? %>
+    <div>
+    <label>Substrate</label>
+    <span class="pro_field_value"><%=pro_fieldset.substrate %></span>
+    </div>
+  <% end %>
+  <% if !pro_fieldset.substrate_qualifier.blank? %>
+    <div>
+    <label>Substrate Qualifier</label>
+    <span class="pro_field_value"><%=pro_fieldset.substrate_qualifier %></span>
+    </div>
+  <% end %>
+  <% if !pro_fieldset.substrate_description.blank? %>
+    <div>
+    <label>Substrate Description</label>
+    <span class="pro_field_value"><%=pro_fieldset.substrate_description %></span>
+    </div>
+  <% end %>
+</div>
