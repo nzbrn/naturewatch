@@ -50,6 +50,7 @@ class Observation < ActiveRecord::Base
   COORDINATE_REGEX = /[^\d\,]*?(#{FLOAT_REGEX})[^\d\,]*?/
   LAT_LON_SEPARATOR_REGEX = /[\,\s]\s*/
   LAT_LON_REGEX = /#{COORDINATE_REGEX}#{LAT_LON_SEPARATOR_REGEX}#{COORDINATE_REGEX}/
+  OBSERVATION_SEX = ["Male", "Female" ,"In Pair", "Mixed"]
   
   PRIVATE = "private"
   OBSCURED = "obscured"
@@ -233,6 +234,10 @@ class Observation < ActiveRecord::Base
     :greater_than_or_equal_to => 1, 
     :only_integer => true,
     :message => "can only be whole number greater than zero."
+  validates_inclusion_of :sex,
+    :in => OBSERVATION_SEX,
+    :message => "%{value} is not a valid sex",
+    :allow_blank => true
   
   before_validation :munge_observed_on_with_chronic,
                     :set_time_zone,

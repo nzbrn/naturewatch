@@ -37,6 +37,11 @@
         </div>
       </div>
 
+      <div class="field"> 
+        <%= o.label(:sex, 'Sex') %>
+        <%= o.select(:sex,Observation::OBSERVATION_SEX, {:prompt => 'Select sex'}) %>
+      </div>
+
       <div class="field">
         <%= o.label(:number_individuals, 'Number of individuals') %>
         <%= o.text_field(:number_individuals) %>
