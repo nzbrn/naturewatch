@@ -245,7 +245,14 @@
       </div>
     </div><!-- end where -->
   </div><!-- end where-and-photos -->
-  
+
+ <% unless @observation.number_individuals.blank? %>
+    <div class="description">
+      <label>Number of individuals:</label>
+        <%= @observation.number_individuals %>
+    </div>
+  <% end %>
+
   <% unless @observation.description.blank? %>
     <div id="observation-description">
       <h3>Description</h3>

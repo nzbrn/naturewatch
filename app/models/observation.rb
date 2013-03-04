@@ -228,6 +228,11 @@ class Observation < ActiveRecord::Base
     :allow_blank => true, 
     :less_than_or_equal_to => 180, 
     :greater_than_or_equal_to => -180
+  validates_numericality_of :number_individuals,
+    :allow_blank => true, 
+    :greater_than_or_equal_to => 1, 
+    :only_integer => true,
+    :message => "can only be whole number greater than zero."
   
   before_validation :munge_observed_on_with_chronic,
                     :set_time_zone,
