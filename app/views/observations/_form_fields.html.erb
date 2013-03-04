@@ -1,5 +1,5 @@
 <%- i ||= 0 -%>
-<%= fields_for observation do |o| %>
+<%= fields_for setup_observation(observation) do |o| %>
   <div class="column span-24 observation stacked">
     <% unless observation.errors.empty? %>
     <%= error_messages_for('observation', :object => observation) %>
@@ -223,7 +223,61 @@
         <% end -%>
       </legend>
       <%= render "observation_field_form_fields", :builder => o %>
-    </fieldset>
-    
+    </fieldset>    
+    <!--
+    <% if is_admin? || is_pro? %>
+      <div id="profields" class ="column span-24">
+        <fieldset>
+          <legend>Pro Fields</legend>
+          <% o.fields_for :pro_fieldset do |ff| %>
+            <div>
+              <%= ff.label :second_hand %>
+              <%= ff.check_box :second_hand %>
+            </div>
+            <div>
+              <%= ff.label :uncertain %>
+              <%= ff.check_box :uncertain %>
+            </div>
+            <div>
+              <%= ff.label :escaped %>
+              <%= ff.check_box :escaped %>
+            </div>
+            <div>
+              <%= ff.label :planted %>
+              <%= ff.check_box :planted %>
+            </div>
+            <div>
+              <%= ff.label :ecologically_significant %>
+              <%= ff.check_box :ecologically_significant %>
+            </div>
+            <div>
+              <%= ff.label :observation_method %>
+              <%= ff.text_field :observation_method %>
+            </div>
+            <div>
+              <%= ff.label :host_name %>
+              <%= ff.text_field :host_name %>
+            </div>
+            <div>
+              <%= ff.label :habitat %>
+              <%= ff.text_field :habitat %>
+            </div>
+            <div>
+              <%= ff.label :substrate %>
+              <%= ff.text_field :substrate %>
+            </div>
+            <div>
+              <%= ff.label :substrate_qualifier %>
+              <%= ff.text_field :substrate_qualifier %>
+            </div>
+            <div>
+              <%= ff.label :substrate_description %>
+              <%= ff.text_field :substrate_description %>
+            </div>
+          <% end %>
+        </fieldset>
+      </div>
+    <% end %>
+    -->
   </div>
 <% end %>

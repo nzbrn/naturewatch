@@ -11226,6 +11226,48 @@ ALTER SEQUENCE preferences_id_seq OWNED BY preferences.id;
 
 
 --
+-- Name: pro_fieldsets; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE pro_fieldsets (
+    id integer NOT NULL,
+    observation_id integer,
+    second_hand boolean DEFAULT false,
+    uncertain boolean DEFAULT false,
+    escaped boolean DEFAULT false,
+    planted boolean DEFAULT false,
+    ecologically_significant boolean DEFAULT false,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    observation_method character varying(255),
+    host_name character varying(255),
+    habitat character varying(255),
+    substrate character varying(255),
+    substrate_qualifier character varying(255),
+    substrate_description character varying(255)
+);
+
+
+--
+-- Name: pro_fieldsets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE pro_fieldsets_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pro_fieldsets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE pro_fieldsets_id_seq OWNED BY pro_fieldsets.id;
+
+
+--
 -- Name: project_assets; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -12663,6 +12705,13 @@ ALTER TABLE ONLY preferences ALTER COLUMN id SET DEFAULT nextval('preferences_id
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY pro_fieldsets ALTER COLUMN id SET DEFAULT nextval('pro_fieldsets_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY project_assets ALTER COLUMN id SET DEFAULT nextval('project_assets_id_seq'::regclass);
 
 
@@ -13172,6 +13221,14 @@ ALTER TABLE ONLY posts
 
 ALTER TABLE ONLY preferences
     ADD CONSTRAINT preferences_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pro_fieldsets_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY pro_fieldsets
+    ADD CONSTRAINT pro_fieldsets_pkey PRIMARY KEY (id);
 
 
 --
@@ -14652,6 +14709,12 @@ INSERT INTO schema_migrations (version) VALUES ('20120214214138');
 INSERT INTO schema_migrations (version) VALUES ('20120215023943');
 
 INSERT INTO schema_migrations (version) VALUES ('20120215204640');
+
+INSERT INTO schema_migrations (version) VALUES ('20120217033712');
+
+INSERT INTO schema_migrations (version) VALUES ('20120220030251');
+
+INSERT INTO schema_migrations (version) VALUES ('20120220034347');
 
 INSERT INTO schema_migrations (version) VALUES ('20120413012920');
 

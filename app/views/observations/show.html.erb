@@ -318,6 +318,13 @@
     
     <%= separator %>
   </div>
+
+<!--
+  <% if (is_admin? || is_pro? ) && @observation.pro_fieldset%>
+    <%= render @observation.pro_fieldset %> 
+    <%= separator %>
+  <% end %>
+-->
   
   <div id="comments_and_identifications" class="column span-16">
     <h3>Comments &amp; Identifications</h3>
