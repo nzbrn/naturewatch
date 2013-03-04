@@ -36,7 +36,12 @@
           e.g. "<%= Date.today.to_s(:long) %>" or "yesterday"
         </div>
       </div>
-      
+
+      <div class="field">
+        <%= o.label(:number_individuals, 'Number of individuals') %>
+        <%= o.text_field(:number_individuals) %>
+      </div>      
+
       <div class="field">
         <%= o.label(:description, 'Description') %>
         <%= o.text_area(:description, :class => "text") %>
