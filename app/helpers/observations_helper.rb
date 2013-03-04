@@ -1,4 +1,9 @@
 module ObservationsHelper
+  def setup_observation(observation)
+    observation.pro_fieldset ||= ProFieldset.new
+    observation
+  end
+
   def observation_image_url(observation, params = {})
     return nil if observation.observation_photos.blank?
     size = params[:size] ? "#{params[:size]}_url" : 'square_url'
