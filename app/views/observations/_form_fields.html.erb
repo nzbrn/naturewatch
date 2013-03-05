@@ -43,6 +43,11 @@
       </div>
 
       <div class="field">
+        <%= o.label(:sought_not_found, 'Sought but not found') %>
+        <%= o.check_box(:sought_not_found) %>
+      </div>
+
+      <div class="field">
         <%= o.label(:number_individuals, 'Number of individuals') %>
         <%= o.text_field(:number_individuals) %>
       </div>      
