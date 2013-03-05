@@ -253,6 +253,12 @@
     </div>
   <% end %>
 
+  <% if @observation.sought_not_found %> 
+    <div class="description">
+    Species was sought for but not found
+    </div>
+  <% end %>
+
  <% unless @observation.number_individuals.blank? %>
     <div class="description">
       <label>Number of individuals:</label>
