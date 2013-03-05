@@ -43,6 +43,11 @@
       </div>
 
       <div class="field">
+        <%= o.label(:cultivated, 'Cultivated') %>
+        <%= o.select(:cultivated,Observation::CULTIVATED_OPTIONS, {:prompt => 'Select ...'}) %>
+      </div>
+
+      <div class="field">
         <%= o.label(:sought_not_found, 'Sought but not found') %>
         <%= o.check_box(:sought_not_found) %>
       </div>
