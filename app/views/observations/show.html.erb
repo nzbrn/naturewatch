@@ -253,6 +253,13 @@
     </div>
   <% end %>
 
+  <% unless @observation.cultivated.blank? %>
+    <div class="description">
+      <label>Cultivated:</label>
+        <%= @observation.cultivated %>
+    </div>
+  <% end %>
+
   <% if @observation.sought_not_found %> 
     <div class="description">
     Species was sought for but not found

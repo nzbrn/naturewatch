@@ -10883,6 +10883,7 @@ CREATE TABLE observations (
     number_individuals integer,
     sex character varying(255),
     sought_not_found boolean DEFAULT false,
+    cultivated character varying(255),
     CONSTRAINT enforce_dims_geom CHECK ((st_ndims(geom) = 2)),
     CONSTRAINT enforce_geotype_geom CHECK (((geometrytype(geom) = 'POINT'::text) OR (geom IS NULL))),
     CONSTRAINT enforce_srid_geom CHECK ((st_srid(geom) = (-1)))
@@ -14727,6 +14728,8 @@ INSERT INTO schema_migrations (version) VALUES ('20120307013130');
 INSERT INTO schema_migrations (version) VALUES ('20120307031141');
 
 INSERT INTO schema_migrations (version) VALUES ('20120307034116');
+
+INSERT INTO schema_migrations (version) VALUES ('20120307213732');
 
 INSERT INTO schema_migrations (version) VALUES ('20120413012920');
 
