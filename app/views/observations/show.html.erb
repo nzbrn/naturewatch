@@ -253,6 +253,13 @@
     </div>
   <% end %>
 
+  <% unless @observation.user_expertise.blank? %>
+    <div class="description">
+      <label>Users Expertise:</label>
+        <%= @observation.user_expertise.humanize %>
+    </div>
+  <% end %>
+
   <% unless @observation.stage.blank? %>
     <div class="description">
       <label>Stage:</label>

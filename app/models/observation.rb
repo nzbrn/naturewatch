@@ -284,7 +284,9 @@ class Observation < ActiveRecord::Base
               :set_geom_from_latlon,
               :set_license,
               :trim_user_agent,
-              :update_identifications
+              :update_identifications,
+              :save_users_expertise
+
   
   before_update :set_quality_grade
                  
@@ -823,7 +825,14 @@ class Observation < ActiveRecord::Base
     @old_observation_taxon_id = nil
     true
   end
-  
+ 
+  #save the users expertise if the user has an experience level for the 
+  #particular taxa level.
+  def save_users_expertise
+    return unless taxon
+    self.user_expertise = user.expertise_for(User::NZBRN_EXPERTISE_ICONIC[taxon.iconic_taxon_name]) 
+  end
+
   def refresh_check_lists
     return true if skip_refresh_check_lists
     refresh_needed = (georeferenced? || was_georeferenced?) && 
