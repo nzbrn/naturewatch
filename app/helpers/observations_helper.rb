@@ -79,5 +79,40 @@ module ObservationsHelper
       content_tag(:span, "(Somewhere...)")
     end
   end
-  
+
+  def stage_name(stage)
+    reverse_stage = {
+      'plant_seedling' => 'Seedling',
+      'plant_juvenile' => 'Juvenile',
+      'plant_adult' => 'Adult',
+      'fungi_disease' => 'Disease symptoms',
+      'fungi_immature' => 'Immature fruiting body',
+      'fungi_mature' => 'Mature fruiting body',
+      'fungi_immature' => 'Immature fruiting body',
+      'insects_egg' => 'Egg',
+      'insects_larva' => 'Larva/Nymph',
+      'insects_pupa' => 'Pupa',
+      'insects_adult' => 'Adult',
+      'birds_egg' => 'Egg',
+      'birds_chick' => 'Chick',
+      'birds_juvenile' => 'Juvenile',
+      'birds_adult' => 'Adult',
+      'mammals_juvenile' => 'Juvenile',
+      'mammals_adult' => 'Adult',
+      'all_egg' => 'Egg',
+      'all_juvenile' => 'Juvenile',
+      'all_adult' => 'Adult',
+    }
+    reverse_stage[stage]
+  end
+
+  #function to filter the stages.  Shouldn't be used until the javascript event is hooked up
+  def filtered_stages(observation)
+    #if !observation.iconic_taxon_name.nil?
+    #  options = Observation::STAGE_OPTIONS.reject { |k,v| ![Observation::NZBRN_ICONIC[observation.iconic_taxon_name]].include? k}
+    #  return options if options.count > 0
+    #end
+    Observation::STAGE_OPTIONS
+  end
+
 end
