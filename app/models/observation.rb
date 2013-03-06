@@ -52,7 +52,29 @@ class Observation < ActiveRecord::Base
   LAT_LON_REGEX = /#{COORDINATE_REGEX}#{LAT_LON_SEPARATOR_REGEX}#{COORDINATE_REGEX}/
   OBSERVATION_SEX = ["Male", "Female" ,"In Pair", "Mixed"]
   CULTIVATED_OPTIONS = %w[Yes No Maybe]
-  
+  NZBRN_ICONIC = {
+    "Animalia" => nil,
+    "Actinopterygii" => nil,
+    "Aves" => "Birds",
+    "Reptilia" => nil,
+    "Amphibia" => nil,
+    "Mammalia" => "Mammals",
+    "Arachnida" => "Spiders",
+    "Plantae" => "Plants",
+    "Fungi" => "Fungi",
+    "Protozoa" => nil,
+    "Mollusca" => nil,
+    "Insecta" => "Insects"
+  }
+  STAGE_OPTIONS = {
+   'Plants' => [['Seedling','plant_seedling'],['Juvenile','plant_juvenile'], ['Adult','plant_adult']],
+   'Fungi' => [['Disease symptoms','fungi_disease'],['Immature fruiting body','fungi_immature'], ['Mature fruiting body','fungi_mature'],['Remains of fruiting body','fungi_remains']],
+   'Insects' => [['Egg','insects_egg'],['Larva/Nymph','insects_larva'], ['Pupa','insects_pupa'],['Adult','insects_adult']],
+   'Birds' => [['Egg','birds_egg'],['Chick','birds_chick'], ['Juvenile','birds_juvenile'],['Adult','birds_adult']],
+   'Mammals' => [['Juvenile','mammals_juvenile'],['Adult','mammals_adult']],
+   'All' => [['Egg','all_egg'],['Juvenile','all_juvenile'], ['Adult','all_adult']]
+  } 
+
   PRIVATE = "private"
   OBSCURED = "obscured"
   GEOPRIVACIES = [OBSCURED, PRIVATE]
@@ -220,7 +242,8 @@ class Observation < ActiveRecord::Base
   validates_presence_of :user_id
   
   validate :must_be_in_the_past,
-           :must_not_be_a_range
+           :must_not_be_a_range,
+           :stage_must_be_valid_for_taxon
   
   validates_numericality_of :latitude,
     :allow_blank => true, 
@@ -1202,7 +1225,22 @@ class Observation < ActiveRecord::Base
       errors.add(:observed_on, "must be a single day, not a range")
     end
   end
-  
+
+  #used to ensure if the stage is set that it is valid
+  def stage_must_be_valid_for_taxon
+    return if stage.blank?
+    @test_taxon = single_taxon_id_for_name(species_guess.strip) unless species_guess.blank?
+    @test_taxon = taxon_id || @test_taxon
+    if(@test_taxon)
+      @iconic = Taxon.find_by_id(@test_taxon).iconic_taxon_name
+      options = Observation::STAGE_OPTIONS[Observation::NZBRN_ICONIC[@iconic]]
+      if options # then there are specific options for this taxa
+        options.each { |v| return if v.include?(stage)}
+        errors.add(:stage, "Stage must be valid for your species")
+      end
+    end
+  end 
+
   def set_taxon_from_taxon_name
     return true if @taxon_name.blank?
     return true if taxon_id

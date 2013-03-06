@@ -42,6 +42,11 @@
         <%= o.select(:sex,Observation::OBSERVATION_SEX, {:prompt => 'Select sex'}) %>
       </div>
 
+      <div class="field"> 
+        <%= o.label("Stage", 'Stage') %>
+        <%= select_tag("observation[stage]", grouped_options_for_select(filtered_stages(observation), observation.stage, "Please Select...")) %>
+      </div>
+
       <div class="field">
         <%= o.label(:cultivated, 'Cultivated') %>
         <%= o.select(:cultivated,Observation::CULTIVATED_OPTIONS, {:prompt => 'Select ...'}) %>

@@ -253,6 +253,13 @@
     </div>
   <% end %>
 
+  <% unless @observation.stage.blank? %>
+    <div class="description">
+      <label>Stage:</label>
+        <%= stage_name(@observation.stage) %>
+    </div>
+  <% end %>
+
   <% unless @observation.cultivated.blank? %>
     <div class="description">
       <label>Cultivated:</label>
