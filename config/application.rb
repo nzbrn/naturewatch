@@ -70,6 +70,8 @@ module Inaturalist
 
 end
 
+PRIORITY_ZONES = ActiveSupport::TimeZone.all.find_all { |z| z.name =~ %r{#{CONFIG.priority_zones.join('|')}} }
+
 ActiveRecord::Base.include_root_in_json = false
 
 ### API KEYS ###

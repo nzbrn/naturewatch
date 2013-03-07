@@ -31,12 +31,12 @@
         <%= o.text_field(:observed_on_string, 
                          :class => 'observed_on_string text') %>
         <%= o.error_message_on(:observed_on) %>
-        <%= o.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, {}, {:class => 'time_zone'} %>
         <div class="small description">
-          e.g. "<%= Date.today.to_s(:long) %>" or "yesterday"
+          e.g. "<%= Date.today.to_s(:long) %>" or "<%= Date.today.to_s(:long) %> 21:22" or "yesterday"
         </div>
       </div>
-
+      <%= link_to_toggle "Click for more details...", "#details" %>
+      <div id="details" style="display: none;">
       <div class="field"> 
         <%= o.label(:sex, 'Sex') %>
         <%= o.select(:sex,Observation::OBSERVATION_SEX, {:prompt => 'Select sex'}) %>
@@ -53,14 +53,21 @@
       </div>
 
       <div class="field">
+        <%= o.label(:number_individuals, 'Number of individuals') %>
+        <%= o.text_field(:number_individuals, :size => 4) %>
+      </div>
+
+      <div class="field">
         <%= o.label(:sought_not_found, 'Sought but not found') %>
         <%= o.check_box(:sought_not_found) %>
       </div>
 
       <div class="field">
-        <%= o.label(:number_individuals, 'Number of individuals') %>
-        <%= o.text_field(:number_individuals) %>
-      </div>      
+        <%= o.label(:time_zone, 'Time zone') %>
+        <%= o.time_zone_select :time_zone, PRIORITY_ZONES, {}, {:class => 'time_zone'} %>
+      </div>
+      </div>
+      <hr />
 
       <div class="field">
         <%= o.label(:description, 'Description') %>
@@ -86,10 +93,10 @@
         <%= o.text_field(:place_guess, :class => 'place_guess text', :placeholder => "Name of the place you made the observation") %>
       </div>
       <div id="coordinates_<%= i %>" class="latlonfields status stacked">
-        <%= o.label(:latitude, 'Lat', :class => "inlineblock") %>
+        <%= o.label(:latitude, 'Latitude', :class => "inlineblock") %>
         <%= o.text_field(:latitude, :class => 'latitude text', "data-tip" => "Latitude in decimal degrees, e.g. 38.123") %>
         
-        <%= o.label(:longitude, 'Lon', :class => "inlineblock") %>
+        <%= o.label(:longitude, 'Longitude', :class => "inlineblock") %>
         <%= o.text_field(:longitude, :class => 'longitude text', "data-tip" => "Longitude in decimal degrees, e.g. -122.123") %>
 
         <span class="button">
@@ -105,9 +112,9 @@
         <%= o.hidden_field(:map_scale, :class => 'map_scale') %>
         <%= o.hidden_field(:location_is_exact, :class => 'location_is_exact') %>
         
-        <%= o.label(:positional_accuracy, 'Acc (m)', :class => "inlineblock") %>
+        <%= o.label(:positional_accuracy, 'Accuracy(m)', :class => "inlineblock") %>
         <%= o.text_field(:positional_accuracy, :class => 'positional_accuracy text inlineblock', "data-tip" => "Accuracy of the coordinates in meters. You can edit this by click the \"edit\" link above or by clicking on the map marker and dragging the handles. Try to make the circle big enough that you're sure you were somewhere inside it.") %>
-        <%= o.label(:positional_accuracy, 'Src', :class => "inlineblock", "data-tip" => "Source of coordinates and accuracy measure, set automatically.") %>
+        <%= o.label(:positional_accuracy, 'Source', :class => "inlineblock", "data-tip" => "Source of coordinates and accuracy measure, set automatically.") %>
         <%= o.text_field(:positioning_method, :class => 'positioning_method text inlineblock', :disabled => true) %>
         <%= o.hidden_field(:positioning_device, :class => 'positioning_device', :disabled => true) %>
       </div>

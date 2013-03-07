@@ -35,12 +35,12 @@ pre, code {margin: 0;}
 
 /* Link Styles */
 a {
-  color: #36C;
+  color: #690;
   text-decoration: none;
 }
 
 a:hover {
-  color: #039;
+  color: #360;
 }
 
 
@@ -331,8 +331,8 @@ span.button {
 }
 
 #flash.notice{background-color:#ffc;}
-.notice a{color:#36C;text-decoration:none;}
-.notice a:hover{color:#039;}
+.notice a{color:#690;text-decoration:none;}
+.notice a:hover{color:#360;}
 .description{font-style:italic;color:#888;}
 .description em{font-style:normal;color:#333;}
 .meta{color:#888;}
@@ -371,7 +371,7 @@ span.button {
 }
 
 a .taxon:hover {
-  color: #36c;
+  color: #690;
   text-decoration: underline;
 }
 
@@ -479,7 +479,7 @@ ul.leafylist li li:first-child {
 .readmore {
   font-weight: bold;
   white-space: nowrap;
-  color: #039;
+  color: #360;
 }
 
 .readmore:after {
@@ -553,7 +553,7 @@ ul.leafylist li li:first-child {
   position: relative;
   z-index: 10;
   background-color: white;
-  color: #36C;
+  color: #690;
   border-color: #ccc;
   border-bottom: 1px solid white;
   background-position: 3px 50%;  
@@ -695,7 +695,7 @@ a.csvlink{background-image:url(/images/silk/table.png);}
   border-bottom: 1px solid #eee;
   border-left: 1px solid #ccc;
   background-color: #eee;
-  color: #36C;
+  color: #690;
 }
 
 .modal_image_link.square {width: 75px; height: 75px; overflow: hidden;}
@@ -724,7 +724,7 @@ a.csvlink{background-image:url(/images/silk/table.png);}
 
 .simpleTaxonSelector .taxon.Unknown          { color: inherit;  background-image: url('/images/iconic_taxa/unknown-15px.png'); }
 .simpleTaxonSelector .taxon.Protozoa         { color: #691776;  background-image: url('/images/iconic_taxa/protozoa-15px.png'); }
-.simpleTaxonSelector .taxon.Plantae          { color: #73AC13;  background-image: url('/images/iconic_taxa/plantae-15px.png'); }
+.simpleTaxonSelector .taxon.Plantae          { color: #73AC13;  background-image: url('/images/iconic_taxa/plantae-cccccc-20px.png'); }
 .simpleTaxonSelector .taxon.Fungi            { color: DeepPink; background-image: url('/images/iconic_taxa/fungi-15px.png'); }
 .simpleTaxonSelector .taxon.Animalia         { color: #1E90FF;  background-image: url('/images/iconic_taxa/animalia-15px.png'); }
 .simpleTaxonSelector .taxon.Mollusca         { color: #FF4500;  background-image: url('/images/iconic_taxa/mollusca-15px.png'); background-position: 0px 0px;}
@@ -900,7 +900,7 @@ form.inline .label {
   color: #777;
   cursor: pointer;
 }
-.helptip.helptiptext:hover {color: #36c;}
+.helptip.helptiptext:hover {color: #690;}
 
 .flag.resolved {
   text-decoration: line-through;
@@ -1002,7 +1002,7 @@ ul .providerlink, ul .button.providerlink { width: 190px; }
 }
 
 abbr.date {border:0 transparent;}
-.date a:hover { border-bottom: 1px dotted #36c;}
+.date a:hover { border-bottom: 1px dotted #690;}
 
 .monthgraph {
   height: 20px; 
