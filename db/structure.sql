@@ -1584,47 +1584,6 @@ CREATE FUNCTION convexhull(geometry) RETURNS geometry
 
 
 --
--- Name: crc32(text); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION crc32(word text) RETURNS bigint
-    LANGUAGE plpgsql IMMUTABLE
-    AS $$
-          DECLARE tmp bigint;
-          DECLARE i int;
-          DECLARE j int;
-          DECLARE byte_length int;
-          DECLARE word_array bytea;
-          BEGIN
-            IF COALESCE(word, '') = '' THEN
-              return 0;
-            END IF;
-          
-            i = 0;
-            tmp = 4294967295;
-            byte_length = bit_length(word) / 8;
-            word_array = decode(replace(word, E'\\', E'\\\\'), 'escape');
-            LOOP
-              tmp = (tmp # get_byte(word_array, i))::bigint;
-              i = i + 1;
-              j = 0;
-              LOOP
-                tmp = ((tmp >> 1) # (3988292384 * (tmp & 1)))::bigint;
-                j = j + 1;
-                IF j >= 8 THEN
-                  EXIT;
-                END IF;
-              END LOOP;
-              IF i >= byte_length THEN
-                EXIT;
-              END IF;
-            END LOOP;
-            return (tmp # 4294967295);
-          END
-        $$;
-
-
---
 -- Name: crosses(geometry, geometry); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -9052,17 +9011,6 @@ CREATE AGGREGATE accum(geometry) (
 
 
 --
--- Name: array_accum(anyelement); Type: AGGREGATE; Schema: public; Owner: -
---
-
-CREATE AGGREGATE array_accum(anyelement) (
-    SFUNC = array_append,
-    STYPE = anyarray,
-    INITCOND = '{}'
-);
-
-
---
 -- Name: collect(geometry); Type: AGGREGATE; Schema: public; Owner: -
 --
 
@@ -10928,6 +10876,10 @@ CREATE TABLE observations (
     positioning_device character varying(255),
     out_of_range boolean,
     license character varying(255),
+    uri character varying(255),
+    geom geometry,
+    photos_count integer DEFAULT 0,
+    comments_count integer DEFAULT 0,
     number_individuals integer,
     sex character varying(255),
     sought_not_found boolean DEFAULT false,
@@ -10935,10 +10887,6 @@ CREATE TABLE observations (
     stage character varying(255),
     user_expertise character varying(255),
     legacy text,
-    geom geometry,
-    uri character varying(255),
-    photos_count integer DEFAULT 0,
-    comments_count integer DEFAULT 0,
     CONSTRAINT enforce_dims_geom CHECK ((st_ndims(geom) = 2)),
     CONSTRAINT enforce_geotype_geom CHECK (((geometrytype(geom) = 'POINT'::text) OR (geom IS NULL))),
     CONSTRAINT enforce_srid_geom CHECK ((st_srid(geom) = (-1)))
@@ -11016,8 +10964,8 @@ CREATE TABLE phone_numbers (
     label character varying(255),
     number character varying(255),
     user_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
 );
 
 
@@ -11296,8 +11244,8 @@ CREATE TABLE pro_fieldsets (
     escaped boolean DEFAULT false,
     planted boolean DEFAULT false,
     ecologically_significant boolean DEFAULT false,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
     observation_method character varying(255),
     host_name character varying(255),
     habitat character varying(255),
@@ -11919,7 +11867,6 @@ CREATE TABLE taxa (
     conservation_status_source_id integer,
     locked boolean DEFAULT false NOT NULL,
     conservation_status_source_identifier integer,
-    backup_ids character varying(50),
     is_active boolean DEFAULT true NOT NULL
 );
 
@@ -12067,8 +12014,7 @@ CREATE TABLE taxon_names (
     updated_at timestamp without time zone,
     name_provider character varying(255),
     creator_id integer,
-    updater_id integer,
-    backup_ids character varying(50)
+    updater_id integer
 );
 
 
@@ -12143,8 +12089,8 @@ CREATE TABLE taxon_ranges (
     description text,
     source_id integer,
     source_identifier integer,
-    geom geometry,
     range_updated_at timestamp without time zone,
+    geom geometry,
     CONSTRAINT enforce_dims_geom CHECK ((st_ndims(geom) = 2)),
     CONSTRAINT enforce_geotype_geom CHECK (((geometrytype(geom) = 'MULTIPOLYGON'::text) OR (geom IS NULL))),
     CONSTRAINT enforce_srid_geom CHECK ((st_srid(geom) = (-1)))
@@ -12343,7 +12289,7 @@ CREATE TABLE users (
     state character varying(255) DEFAULT 'passive'::character varying,
     deleted_at timestamp without time zone,
     time_zone character varying(255),
-    description text,
+    description character varying(255),
     icon_file_name character varying(255),
     icon_content_type character varying(255),
     icon_file_size integer,
@@ -12355,14 +12301,6 @@ CREATE TABLE users (
     old_preferences text,
     icon_url character varying(255),
     last_ip character varying(255),
-    gender character varying(255),
-    year_of_birth integer,
-    first_name character varying(255),
-    last_name character varying(255),
-    address text,
-    deceased boolean DEFAULT false,
-    expertise text,
-    legacy text,
     confirmation_sent_at timestamp without time zone,
     reset_password_token character varying(255),
     reset_password_sent_at timestamp without time zone,
@@ -12370,7 +12308,15 @@ CREATE TABLE users (
     suspended_at timestamp without time zone,
     suspension_reason character varying(255),
     icon_updated_at timestamp without time zone,
-    uri character varying(255)
+    uri character varying(255),
+    gender character varying(255),
+    year_of_birth integer,
+    first_name character varying(255),
+    last_name character varying(255),
+    address text,
+    deceased boolean DEFAULT false,
+    expertise text,
+    legacy text
 );
 
 
@@ -13087,6 +13033,14 @@ ALTER TABLE ONLY flow_tasks
 
 
 --
+-- Name: friendly_id_slugs_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY friendly_id_slugs
+    ADD CONSTRAINT friendly_id_slugs_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: friendships_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -13364,14 +13318,6 @@ ALTER TABLE ONLY roles
 
 ALTER TABLE ONLY rules
     ADD CONSTRAINT rules_pkey PRIMARY KEY (id);
-
-
---
--- Name: slugs_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY friendly_id_slugs
-    ADD CONSTRAINT slugs_pkey PRIMARY KEY (id);
 
 
 --
@@ -13689,6 +13635,20 @@ CREATE INDEX index_flow_tasks_on_user_id ON flow_tasks USING btree (user_id);
 
 
 --
+-- Name: index_friendly_id_slugs_on_slug_and_sluggable_type; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_friendly_id_slugs_on_slug_and_sluggable_type ON friendly_id_slugs USING btree (slug, sluggable_type);
+
+
+--
+-- Name: index_friendly_id_slugs_on_sluggable_type; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_friendly_id_slugs_on_sluggable_type ON friendly_id_slugs USING btree (sluggable_type);
+
+
+--
 -- Name: index_identifications_on_observation_id_and_created_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -13885,6 +13845,27 @@ CREATE INDEX index_observations_on_comments_count ON observations USING btree (c
 
 
 --
+-- Name: index_observations_on_geom; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_observations_on_geom ON observations USING gist (geom);
+
+
+--
+-- Name: index_observations_on_observed_on_and_time_observed_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_observations_on_observed_on_and_time_observed_at ON observations USING btree (observed_on, time_observed_at);
+
+
+--
+-- Name: index_observations_on_out_of_range; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_observations_on_out_of_range ON observations USING btree (out_of_range);
+
+
+--
 -- Name: index_observations_on_photos_count; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -13892,10 +13873,31 @@ CREATE INDEX index_observations_on_photos_count ON observations USING btree (pho
 
 
 --
+-- Name: index_observations_on_quality_grade; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_observations_on_quality_grade ON observations USING btree (quality_grade);
+
+
+--
+-- Name: index_observations_on_taxon_id_and_user_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_observations_on_taxon_id_and_user_id ON observations USING btree (taxon_id, user_id);
+
+
+--
 -- Name: index_observations_on_uri; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_observations_on_uri ON observations USING btree (uri);
+
+
+--
+-- Name: index_observations_on_user_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_observations_on_user_id ON observations USING btree (user_id);
 
 
 --
@@ -14466,13 +14468,6 @@ CREATE INDEX index_users_on_uri ON users USING btree (uri);
 
 
 --
--- Name: index_wiki_page_attachments_on_page_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_wiki_page_attachments_on_page_id ON wiki_page_attachments USING btree (page_id);
-
-
---
 -- Name: index_wiki_page_versions_on_page_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -14505,13 +14500,6 @@ CREATE UNIQUE INDEX index_wiki_pages_on_path ON wiki_pages USING btree (path);
 --
 
 CREATE INDEX pof_projid_ofid ON project_observation_fields USING btree (project_id, observation_field_id);
-
-
---
--- Name: pof_projid_pos; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX pof_projid_pos ON project_observation_fields USING btree (project_id, "position");
 
 
 --
@@ -14738,10 +14726,6 @@ INSERT INTO schema_migrations (version) VALUES ('20120220030251');
 INSERT INTO schema_migrations (version) VALUES ('20120220034347');
 
 INSERT INTO schema_migrations (version) VALUES ('20120220035337');
-
-INSERT INTO schema_migrations (version) VALUES ('20120222012123');
-
-INSERT INTO schema_migrations (version) VALUES ('20120305022350');
 
 INSERT INTO schema_migrations (version) VALUES ('20120307013130');
 
