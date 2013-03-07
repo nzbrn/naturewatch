@@ -105,7 +105,7 @@
       <%= f.text_field(:last_name, :class => "text") %>
     </div>
     <div class="last column span-9">
-      <%= f.time_zone_select(:time_zone, ActiveSupport::TimeZone.us_zones, 
+      <%= f.time_zone_select(:time_zone, PRIORITY_ZONES, 
         {:selected => current_user.time_zone}, 
         {:class => 'select', :description => "All your observations will default to this time zone unless you specify otherwise."}) %>
     </div>

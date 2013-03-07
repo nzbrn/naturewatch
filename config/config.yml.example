@@ -41,6 +41,13 @@ base: &base
     # large square branding image that appears on pages like /login. Should be 300 px wide and about that tall
     logo_icon_square_big: bird.png
 
+    priority_zones:
+      - US
+      - Arizona
+      - Indiana
+      - Hawaii
+      - Alaska
+
     # default bounds for most maps, including /observations/new and the home page. Defaults to the whole world
     # bounds:
     #     swlat: 13.667338

@@ -13,7 +13,7 @@
   <% o.form_field :observed_on_string, :label => "Date/Time" do %>
     <input type="datetime-local" id="observation_observed_on_string" name="observation[observed_on_string]" class="text" value="<%= Time.now %>"/>
   <% end -%>
-  <%= o.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, {}, {:class => 'time_zone select'} %>
+  <%= o.time_zone_select :time_zone, PRIORITY_ZONES, {}, {:class => 'time_zone select'} %>
   <%= o.text_field :latitude %>
   <%= o.text_field :longitude %>
   <%= o.text_field :positional_accuracy, :label => "Accuracy (meters)" %>
