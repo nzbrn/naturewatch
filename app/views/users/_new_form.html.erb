@@ -6,7 +6,7 @@
   <%= f.text_field :email, :class => 'text', :autocorrect => "off", :autocapitalize => "off", :type => "email" %>
   <%= f.password_field :password, :class => 'text' %>
   <%= f.password_field :password_confirmation, :class => 'text' %>
-  <%= f.time_zone_select(:time_zone, ActiveSupport::TimeZone.us_zones, {}, {
+  <%= f.time_zone_select(:time_zone, PRIORITY_ZONES, {}, {
     :label => "Your default time zone",
     :description => "All your observations will default to this time zone unless you specify otherwise.",
     :class => 'select'}) %>
