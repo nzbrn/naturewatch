@@ -158,3 +158,6 @@ test:
 
 production:
     <<: *base
+
+staging:
+    <<: *base
