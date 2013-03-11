@@ -47,7 +47,7 @@ class Taxon < ActiveRecord::Base
     indexes colors.value, :as => :color_values
     has iconic_taxon_id, :facet => true, :type => :integer
     has colors(:id), :as => :colors, :facet => true, :type => :multi
-    has is_active
+    has is_active, :type => :boolean, :as => :is_active
     # has listed_taxa(:place_id), :as => :places, :facet => true, :type => :multi
     # has listed_taxa(:list_id), :as => :lists, :type => :multi
     has created_at, ancestry
