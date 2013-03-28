@@ -595,6 +595,9 @@ class Place < ActiveRecord::Base
   end
 
   def bbox_contains_lat_lng_acc?(lat, lng, acc)
+    # FIXME: Getting error `RGeo::Error::UnsupportedOperation (Method Geometry#contains? not defined.)`
+    # This is a temporary fix
+=begin
     f = RGeo::Geographic.simple_mercator_factory
     bbox = f.polygon(
       f.linear_ring([
@@ -613,6 +616,8 @@ class Place < ActiveRecord::Base
     pt = pt.buffer(acc) if acc.to_f > 0
 
     bbox.contains?(pt)
+=end
+    bbox_contains_lat_lng?(lat, lng)
   end
 
   def kml_url
