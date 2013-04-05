@@ -96,14 +96,14 @@
     <center>
       <%= link_to image_tag("/images/map-icon-155px.jpg"),observations_path %>
       <h1><%= link_to "Explore!", observations_path %></h1>
-      <p>Your <%= link_to "World!", observations_path %></p>
+      <p>View <%= link_to "Observations!", observations_path %></p>
     </center>
   </div>
   <div id="learn" class="column span-5">
     <center>
       <%= link_to image_tag("/images/animals.jpg", :height => 155), taxa_path %>
       <h1><%= link_to "Learn!", taxa_path %></h1>
-      <p>About <%= link_to "Life!", taxa_path %></p>
+      <p>About <%= link_to "NZ Species!", taxa_path %></p>
     </center>
   </div>
   <div id="record" class="column span-5 border">
@@ -111,7 +111,7 @@
       <%= link_to image_tag("/images/notebook-icon-color-155px-shadow.jpg", :width => 131, :height => 155), new_observation_path, :rel => "nofollow" %>
       <h1><%= link_to "Record!", new_observation_path, :rel => "nofollow" %></h1>
       <p>
-        <%= link_to "Add Observations!", new_observation_path, :rel => 'nofollow' %>
+        Add <%= link_to "Observations!", new_observation_path, :rel => 'nofollow' %>
       </p>
     </center>
   </div>
