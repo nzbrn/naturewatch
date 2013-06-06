@@ -24,7 +24,7 @@ Inaturalist::Application.configure do
   config.active_record.logger = nil
 
   # Use a different cache store in production
-  config.cache_store = :mem_cache_store, CONFIG.memcached
+  config.cache_store = :mem_cache_store, CONFIG.memcached, {:namespace => "naturewatch_production"}
 
   # Disable Rails's static asset server
   # In production, Apache or nginx will already do this

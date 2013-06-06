@@ -29,7 +29,7 @@ Inaturalist::Application.configure do
   # config.action_controller.perform_caching             = true
   # config.action_view.cache_template_loading            = true
   # config.cache_classes = true
-  config.cache_store = :mem_cache_store, CONFIG.memcached
+  config.cache_store = :mem_cache_store, CONFIG.memcached, {:namespace => "naturewatch_development"}
 
   # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :log
