@@ -114,5 +114,15 @@ module ObservationsHelper
     #end
     Observation::STAGE_OPTIONS
   end
+  
+  def coordinate_system_select_options
+    options = {}
+    
+    CONFIG.coordinate_systems.each do |system_name, system|
+      options[system[:label]] = system_name
+    end
+    
+    options
+  end
 
 end

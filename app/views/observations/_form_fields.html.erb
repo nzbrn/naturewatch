@@ -1,3 +1,12 @@
+<% if observation.new_record? && CONFIG.coordinate_systems %>
+<%- content_for(:extrajs) do -%>
+  <script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+      $('#geo-tabs').tabs();
+    });
+  </script>
+<%- end -%>
+<% end %>
 <%- i ||= 0 -%>
 <%= fields_for setup_observation(observation) do |o| %>
   <div class="column span-24 observation stacked">
@@ -88,58 +97,95 @@
       </div>
     </div>
     <div class="column span-9">
-      <div class="place_guess_field field">
-        <%= o.label(:place_guess, 'Where were you?') %>
-        <%= o.text_field(:place_guess, :class => 'place_guess text', :placeholder => "Name of the place you made the observation") %>
-      </div>
-      <div id="coordinates_<%= i %>" class="latlonfields status stacked">
-        <%= o.label(:latitude, 'Latitude', :class => "inlineblock") %>
-        <%= o.text_field(:latitude, :class => 'latitude text', "data-tip" => "Latitude in decimal degrees, e.g. 38.123") %>
-        
-        <%= o.label(:longitude, 'Longitude', :class => "inlineblock") %>
-        <%= o.text_field(:longitude, :class => 'longitude text', "data-tip" => "Longitude in decimal degrees, e.g. -122.123") %>
-
-        <span class="button">
-          <%= link_to_function("edit", 
-            "$('#coordinates_#{i}').toggleClass('status').toggleClass('open'); " +
-            "$(this).hide(); " + 
-            "$(this).next().show(); " + 
-            "if ($('#observation_positional_accuracy').val()) {$.fn.latLonSelector.editAccuracy()};" +
-            "return false;") %>
-          <%= link_to_function("hide", "$('#coordinates_#{i}').toggleClass('status').toggleClass('open'); $(this).hide(); $(this).prev().show(); $.fn.latLonSelector.stopEditAccuracy(); return false;", :style => 'display: none') %>
-        </span>
-        
-        <%= o.hidden_field(:map_scale, :class => 'map_scale') %>
-        <%= o.hidden_field(:location_is_exact, :class => 'location_is_exact') %>
-        
-        <%= o.label(:positional_accuracy, 'Accuracy(m)', :class => "inlineblock") %>
-        <%= o.text_field(:positional_accuracy, :class => 'positional_accuracy text inlineblock', "data-tip" => "Accuracy of the coordinates in meters. You can edit this by click the \"edit\" link above or by clicking on the map marker and dragging the handles. Try to make the circle big enough that you're sure you were somewhere inside it.") %>
-        <%= o.label(:positional_accuracy, 'Source', :class => "inlineblock", "data-tip" => "Source of coordinates and accuracy measure, set automatically.") %>
-        <%= o.text_field(:positioning_method, :class => 'positioning_method text inlineblock', :disabled => true) %>
-        <%= o.hidden_field(:positioning_device, :class => 'positioning_device', :disabled => true) %>
-      </div>
-      <div id="mapcontainer" class="stacked">
-        <div id="map"></div>
-        <% if observation.latitude.blank? -%>
-          <div class="floating dark description">
-            <strong>Click the map</strong> to add a location.
-          </div>
-        <% end -%>
-      </div>
-      <div id="geoprivacy_<%= i %>" class="geoprivacyfield">
-        <label for="observations_<%= i %>_geoprivacy">Change geoprivacy</label>
-        <%= o.select :geoprivacy, Observation::GEOPRIVACIES, :include_blank => "open" %>
-        <span class="geoprivacy_tip_target description helptip" rel="#geoprivacy_<%= i %>_tip"></span>
-        <div id="geoprivacy_<%= i %>_tip" class="geoprivacy_tip" style="display:none">
-          <p>Changing the geoprivacy alters how other people see the location of your observation.</p>
-          <dl>
-            <% for privacy, description in Observation::GEOPRIVACY_DESCRIPTIONS %>
-              <dt><%= privacy || "open" %></dt>
-              <dd><%= description %></dd>
+    <% if observation.new_record? && CONFIG.coordinate_systems %>
+      <label>Where were you?</label>
+      <div id="geo-tabs" class="ui-tabs">
+        <ul>
+          <li><a href="#map-tab"><span>Map</span></a></li>
+          <li><a href="#other"><span>Other</span></a></li>
+        </ul>
+      
+        <div id="map-tab">
+      <% end %>
+          <div class="place_guess_field field">
+            <% if !CONFIG.coordinate_systems || (CONFIG.coordinate_systems && !observation.new_record?) %>
+              <%= o.label(:place_guess, 'Where were you?') %>
             <% end %>
-          </dl>
+            <%= o.text_field(:place_guess, :class => 'place_guess text', :placeholder => "Name of the place you made the observation") %>
+          </div>
+          <div id="coordinates_<%= i %>" class="latlonfields status stacked">
+            <%= o.label(:latitude, 'Latitude', :class => "inlineblock") %>
+            <%= o.text_field(:latitude, :class => 'latitude text', "data-tip" => "Latitude in decimal degrees, e.g. 38.123") %>
+            
+            <%= o.label(:longitude, 'Longitude', :class => "inlineblock") %>
+            <%= o.text_field(:longitude, :class => 'longitude text', "data-tip" => "Longitude in decimal degrees, e.g. -122.123") %>
+
+            <span class="button">
+              <%= link_to_function("edit",
+                "$('#coordinates_#{i}').toggleClass('status').toggleClass('open'); " +
+                "$(this).hide(); " +
+                "$(this).next().show(); " +
+                "if ($('#observation_positional_accuracy').val()) {$.fn.latLonSelector.editAccuracy()};" +
+                "return false;") %>
+              <%= link_to_function("hide", "$('#coordinates_#{i}').toggleClass('status').toggleClass('open'); $(this).hide(); $(this).prev().show(); $.fn.latLonSelector.stopEditAccuracy(); return false;", :style => 'display: none') %>
+            </span>
+            
+            <%= o.hidden_field(:map_scale, :class => 'map_scale') %>
+            <%= o.hidden_field(:location_is_exact, :class => 'location_is_exact') %>
+            
+            <%= o.label(:positional_accuracy, 'Accuracy(m)', :class => "inlineblock") %>
+            <%= o.text_field(:positional_accuracy, :class => 'positional_accuracy text inlineblock', "data-tip" => "Accuracy of the coordinates in meters. You can edit this by click the \"edit\" link above or by clicking on the map marker and dragging the handles. Try to make the circle big enough that you're sure you were somewhere inside it.") %>
+            <%= o.label(:positional_accuracy, 'Source', :class => "inlineblock", "data-tip" => "Source of coordinates and accuracy measure, set automatically.") %>
+            <%= o.text_field(:positioning_method, :class => 'positioning_method text inlineblock', :disabled => true) %>
+            <%= o.hidden_field(:positioning_device, :class => 'positioning_device', :disabled => true) %>
+          </div>
+          <div id="mapcontainer" class="stacked">
+            <div id="map"></div>
+            <% if observation.latitude.blank? -%>
+              <div class="floating dark description">
+                <strong>Click the map</strong> to add a location.
+              </div>
+            <% end -%>
+          </div>
+      <% if observation.new_record? && CONFIG.coordinate_systems %>
+        </div>
+        <div id="other">
+          <%= o.text_field(:place_guess_other, :class => 'text', :placeholder => "Name of the place you made the observation") %>
+          <div class="latlonfields open other">
+            <%= o.label(:coordinate_system, 'Coordinate system') %>
+            <%= o.select :coordinate_system, coordinate_system_select_options %>
+            <span class="coordinate_system_tip_target description helptip" rel="#coordinate_system_<%= i %>_tip"></span>
+            <div id="coordinate_system_<%= i %>_tip" class="geoprivacy_tip" style="display:none">
+              <p>A variety of different coordinate systems are used in NZ. The most common NZ-specific systems are NZMG and NZTM2000. NZMG, the New Zealand Map Grid, is the system used by the the old NZMS260 topomap series. NZTM2000, the NZ Transverse Mercator 2000, is the new and improved version of this that is used by current topomaps. If your coordinates are from a GPS unit, check its settings for the name of the coordinate system it is using.</p>
+              <p>When you provide coordinates representing a location, we need to know which coordinate system is used, to be able to interpret them correctly. Please be certain you have chosen the correct coordinate system for your data or the location may finish up a long way from where it should be. You can see where it is on the NatureWatch NZ map only after you save your observation (and if it's wrong, click Edit and try again).</p>
+            </div>
+
+            <%= o.label(:geo_x, 'Easting') %>
+            <%= o.text_field(:geo_x) %>
+            
+            <%= o.label(:geo_y, 'Northing') %>
+            <%= o.text_field(:geo_y) %>
+            
+            <%= o.label(:positional_accuracy_other, 'Accuracy(m)') %>
+            <%= o.text_field(:positional_accuracy_other) %>
+          </div>
         </div>
       </div>
+      <% end %>
+          <div id="geoprivacy_<%= i %>" class="geoprivacyfield">
+            <label for="observations_<%= i %>_geoprivacy">Change geoprivacy</label>
+            <%= o.select :geoprivacy, Observation::GEOPRIVACIES, :include_blank => "open" %>
+            <span class="geoprivacy_tip_target description helptip" rel="#geoprivacy_<%= i %>_tip"></span>
+            <div id="geoprivacy_<%= i %>_tip" class="geoprivacy_tip" style="display:none">
+              <p>Changing the geoprivacy alters how other people see the location of your observation.</p>
+              <dl>
+                <% for privacy, description in Observation::GEOPRIVACY_DESCRIPTIONS %>
+                  <dt><%= privacy || "open" %></dt>
+                  <dd><%= description %></dd>
+                <% end %>
+              </dl>
+            </div>
+          </div>
     </div>
     <div class="last column span-8">
       <div class="field">

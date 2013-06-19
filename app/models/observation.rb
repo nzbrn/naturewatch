@@ -39,6 +39,13 @@ class Observation < ActiveRecord::Base
   # licensing extras
   attr_accessor :make_license_default
   attr_accessor :make_licenses_same
+  
+  # coordinate system
+  attr_accessor :coordinate_system
+  attr_accessor :place_guess_other
+  attr_accessor :positional_accuracy_other
+  attr_accessor :geo_x
+  attr_accessor :geo_y
 
   serialize :legacy
   
@@ -144,6 +151,7 @@ class Observation < ActiveRecord::Base
     "tag_list",
     "description",
   ]
+  WGS84_PROJ4 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   
   belongs_to :user, :counter_cache => true
   belongs_to :taxon, :counter_cache => true
@@ -268,6 +276,20 @@ class Observation < ActiveRecord::Base
     :in => CULTIVATED_OPTIONS,
     :message => "%{value} is not a valid cultivated option",
     :allow_blank => true
+
+  validates_inclusion_of :coordinate_system,
+    :in => proc { CONFIG.coordinate_systems.keys },
+    :message => "%{value} is not a valid coordinate system",
+    :allow_blank => true
+  # See /config/locale/en.yml for field labels for `geo_x` and `geo_y`
+  validates_numericality_of :geo_x,
+    :allow_blank => true,
+    :message => "should be a number"
+  validates_numericality_of :geo_y,
+    :allow_blank => true,
+    :message => "should be a number"
+  validates_presence_of :geo_x, :if => proc {|o| o.geo_y.present? }
+  validates_presence_of :geo_y, :if => proc {|o| o.geo_x.present? }
   
   before_validation :munge_observed_on_with_chronic,
                     :set_time_zone,
@@ -289,7 +311,7 @@ class Observation < ActiveRecord::Base
               :update_identifications,
               :save_users_expertise
 
-  
+  before_create :set_coordinates
   before_update :set_quality_grade
                  
   after_save :refresh_lists,
@@ -1565,6 +1587,39 @@ class Observation < ActiveRecord::Base
       identifications.detect {|ident| ident.user_id == user_id && ident.current?}
     else
       identifications.current.by(user_id).last
+    end
+  end
+  
+  def set_coordinates
+    if self.geo_x.present? && self.geo_y.present? && self.coordinate_system.present? && self.latitude.blank? && self.longitude.blank?
+      # Set the place_guess if place_guess_other is present
+      self.place_guess = self.place_guess_other if self.place_guess_other.present?
+
+      # Set the positional_accuracy if positional_accuracy_other is present
+      self.positional_accuracy = self.positional_accuracy_other if self.positional_accuracy_other.present?
+
+      # Perform the transformation
+      # transfrom from `self.coordinate_system`
+      from = RGeo::CoordSys::Proj4.new(CONFIG.coordinate_systems.send(self.coordinate_system.to_sym).proj4)
+
+      # ... to WGS84
+      to = RGeo::CoordSys::Proj4.new(WGS84_PROJ4)
+
+      # Returns an array of lat, lon
+      transform = RGeo::CoordSys::Proj4.transform_coords(from, to, self.geo_x.to_d, self.geo_y.to_d)
+
+      # Set the transfor
+      self.longitude, self.latitude = transform
+
+
+      # Store `geo_x`, `geo_y`, `coordinate_system`, `longitude` and `latitude` in the legacy colum
+      self.legacy = (self.legacy || {}).merge({
+        :geo_x => self.geo_x.to_d,
+        :geo_y => self.geo_y.to_d,
+        :coordinate_system => self.coordinate_system,
+        :longitude =>  self.longitude,
+        :latitude => self.latitude
+      })
     end
   end
   
