@@ -161,13 +161,13 @@
             </div>
 
             <%= o.label(:geo_x, 'Easting') %>
-            <%= o.text_field(:geo_x) %>
+            <%= o.text_field(:geo_x, :class => "text") %>
             
             <%= o.label(:geo_y, 'Northing') %>
-            <%= o.text_field(:geo_y) %>
+            <%= o.text_field(:geo_y, :class => "text") %>
             
             <%= o.label(:positional_accuracy_other, 'Accuracy(m)') %>
-            <%= o.text_field(:positional_accuracy_other) %>
+            <%= o.text_field(:positional_accuracy_other, :class => "text", "data-tip" => "Accuracy of the coordinates in meters. Try to make the circle big enough that you're sure you were somewhere inside it. This field is optional.") %>
           </div>
         </div>
       </div>
