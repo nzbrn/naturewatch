@@ -1591,7 +1591,7 @@ class Observation < ActiveRecord::Base
   end
   
   def set_coordinates
-    if self.geo_x.present? && self.geo_y.present? && self.coordinate_system.present? && self.latitude.blank? && self.longitude.blank?
+    if self.geo_x.present? && self.geo_y.present? && self.coordinate_system.present?
       # Set the place_guess if place_guess_other is present
       self.place_guess = self.place_guess_other if self.place_guess_other.present?
 
