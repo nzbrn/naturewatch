@@ -1,6 +1,5 @@
 <%- 
   widget_url ||= @widget_url || observations_by_login_feed_url(current_user.login, :format => "widget", :limit => 5)
-  base_url = Rails.env.production? ? "http://inaturalist.org" : "http://localhost:3000"
   place ||= @place
   taxon ||= @taxon
   project ||= @project
@@ -23,14 +22,14 @@
 </style>
 <div class="inat-widget">
   <% if @logo != "none" -%>
-    <div class="inat-widget-header"><%= link_to image_tag("#{base_url}/images/#{@logo}"), root_url %></div>
+    <div class="inat-widget-header"><%= link_to image_tag("#{CONFIG.site_url}/images/#{@logo}"), root_url %></div>
   <% end -%>
   <script type="text/javascript" charset="utf-8" src="<%= widget_url %>"></script>
   <table>
     <tr class="inat-user">
       <% unless place || taxon || project %>
         <td class="inat-user-image">
-          <%- img_url = base_url + current_user.icon.url(:thumb) -%>
+          <%- img_url = CONFIG.site_url + current_user.icon.url(:thumb) -%>
           <%= link_to image_tag(img_url, :class => 'usericon'), observations_by_login_url(current_user.login), :border => 0 %>
         </td>
       <% end %>
