@@ -4,10 +4,11 @@ class Observation < ActiveRecord::Base
     :comments => {:notification => "activity", :include_owner => true},
     :identifications => {:notification => "activity", :include_owner => true}
   }
-  notifies_subscribers_of :user, :notification => "created_observations"
+  notifies_subscribers_of :user, :notification => "created_observations",
+    :queue_if => lambda { |observation| !observation.bulk_import }
   notifies_subscribers_of :public_places, :notification => "new_observations", 
     :queue_if => lambda {|observation|
-      observation.georeferenced? && !observation.taxon_id.blank?
+      observation.georeferenced? && !observation.taxon_id.blank? && !observation.bulk_import
     },
     :if => lambda {|observation, place, subscription|
       return false unless observation.georeferenced?
@@ -16,7 +17,7 @@ class Observation < ActiveRecord::Base
       observation.taxon.ancestor_ids.include?(subscription.taxon_id)
     }
   notifies_subscribers_of :taxon_and_ancestors, :notification => "new_observations", 
-    :queue_if => lambda {|observation| !observation.taxon_id.blank? },
+    :queue_if => lambda {|observation| !observation.taxon_id.blank? && !observation.bulk_import},
     :if => lambda {|observation, taxon, subscription|
       return true if observation.taxon_id == taxon.id
       return false if observation.taxon.blank?
@@ -30,7 +31,7 @@ class Observation < ActiveRecord::Base
   # Set to true if you want to skip the expensive updating of all the user's
   # lists after saving.  Useful if you're saving many observations at once and
   # you want to update lists in a batch
-  attr_accessor :skip_refresh_lists, :skip_refresh_check_lists, :skip_identifications
+  attr_accessor :skip_refresh_lists, :skip_refresh_check_lists, :skip_identifications, :bulk_import
   
   # Set if you need to set the taxon from a name separate from the species 
   # guess
