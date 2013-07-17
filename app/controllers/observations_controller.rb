@@ -443,6 +443,7 @@ class ObservationsController < ApplicationController
     @observation_fields = ObservationField.
       includes(:observation_field_values => {:observation => :user}).
       where("users.id = ?", current_user).
+      where("observations.id = ?", @observation.id).
       limit(10).
       order("observation_field_values.id DESC")
 
