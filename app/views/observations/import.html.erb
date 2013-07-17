@@ -58,6 +58,9 @@
     <ul>
       <li><a href="#photo_import"><span>Import from Photos</span></a></li>
       <li><a href="#csv_import"><span>Import from CSV</span></a></li>
+      <% if is_admin? || is_pro? || is_curator? %>
+      <li><a href="#bulk_import"><span>Bulk CSV Import</span></a></li>
+      <% end %>
     </ul>
     
     <div id="photo_import">
@@ -140,5 +143,215 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
         </ol>
       </div>
     </div>
+
+    <% if is_admin? || is_pro? || is_curator? %>
+    <div id="bulk_import">
+      <div class="readable description">
+        Upload a larger CSV file with observation data. This is similar to the CSV upload option
+        except that this allows a larger data set (10k rows) to be imported. This is also done
+        as a background process, and you will be sent an email on completion.
+      </div>
+
+      <div class="column">
+        <%= form_tag(new_observation_bulk_csv_path,
+                     :id => 'new_bulk_form',
+                     :class => 'clear observationform',
+                     :multipart => true) do %>
+          <div class="column field span-16">
+            <div class="column span-4">
+              <h3><label for="upload_file">Upload CSV file</label></h3>
+            </div>
+            <div class="last column span-12">
+              <%= file_field 'upload', 'datafile', :class => 'text' %>
+            </div>
+          </div>
+          <div class="column field span-16">
+            <div class="column span-4">
+              <h3><label for="project">Add to Project</label></h3>
+            </div>
+            <div class="last column span-12">
+              <%= select 'upload', :project_id, @projects, { :include_blank => 'None' } %>
+            </div>
+          </div>
+          <div class="column field span-16">
+            <div class="column span-4">
+              <h3><label for="project">Coordinate System</label></h3>
+            </div>
+            <div class="last column span-12">
+              <%= select 'upload', :coordinate_system, { 'WGS84' => 'wgs84' }.update(coordinate_system_select_options) %>
+            </div>
+          </div>
+          <div class="column span-16">
+            <div class="buttonrow">
+              <%= submit_tag "Upload", :class => 'default button', "data-loading-click" => "Importing..." %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="description">
+        <h3>Rules &amp; Formatting</h3>
+        <ol>
+          <li>No header row</li>
+          <li>Only files with 10,000 rows at a time, please</li>
+          <li>Make sure it is well formed CSV - an export from any spreadsheet application (eg Excel, LibreOffice) should provide this.</li>
+          <li>
+            <p class="ui">We can only understand CSV in the following format:</p>
+            <table cellspacing="0" border="0" cellpadding="0">
+              <tr>
+                <th>Field Name</th>
+                <th>Field Type</th>
+                <th>Value Format</th>
+              </tr>
+              <tr>
+                <td>Taxon name</td>
+                <td>text</td>
+                <td><%= field_value_example('text') %></td>
+              </tr>
+              <tr>
+                <td>Date observed</td>
+                <td>date and time</td>
+                <td><%= field_value_example('datetime') %></td>
+              </tr>
+              <tr>
+                <td>Description</td>
+                <td>text</td>
+                <td><%= field_value_example('text') %></td>
+              </tr>
+              <tr>
+                <td>Place name</td>
+                <td>text</td>
+                <td><%= field_value_example('text') %></td>
+              </tr>
+              <tr>
+                <td>Latitude</td>
+                <td>coordinate</td>
+                <td><%= field_value_example('coordinate') %></td>
+              </tr>
+              <tr>
+                <td>Longitude</td>
+                <td>coordinate</td>
+                <td><%= field_value_example('coordinate') %></td>
+              </tr>
+              <tr>
+                <td>Tags</td>
+                <td>text</td>
+                <td><%= field_value_example('text') %></td>
+              </tr>
+              <tr>
+                <td>Sex</td>
+                <td>list</td>
+                <td><%= field_value_example('list') %></td>
+              </tr>
+              <tr>
+                <td>Stage</td>
+                <td>list</td>
+                <td><%= field_value_example('list') %></td>
+              </tr>
+              <tr>
+                <td>Cultivated</td>
+                <td>list</td>
+                <td><%= field_value_example('list') %></td>
+              </tr>
+              <tr>
+                <td>Number of individuals</td>
+                <td>number</td>
+                <td><%= field_value_example('number') %></td>
+              </tr>
+              <tr>
+                <td>Sought by not found</td>
+                <td>boolean</td>
+                <td><%= field_value_example('boolean') %></td>
+              </tr>
+              <tr>
+                <td>Second Hand</td>
+                <td>boolean</td>
+                <td><%= field_value_example('boolean') %></td>
+              </tr>
+              <tr>
+                <td>Uncertain</td>
+                <td>boolean</td>
+                <td><%= field_value_example('boolean') %></td>
+              </tr>
+              <tr>
+                <td>Escaped</td>
+                <td>boolean</td>
+                <td><%= field_value_example('boolean') %></td>
+              </tr>
+              <tr>
+                <td>Planted</td>
+                <td>boolean</td>
+                <td><%= field_value_example('boolean') %></td>
+              </tr>
+              <tr>
+                <td>Ecologically Significant</td>
+                <td>boolean</td>
+                <td><%= field_value_example('boolean') %></td>
+              </tr>
+              <tr>
+                <td>Observation Method</td>
+                <td>text</td>
+                <td><%= field_value_example('text') %></td>
+              </tr>
+              <tr>
+                <td>Host Name</td>
+                <td>text</td>
+                <td><%= field_value_example('text') %></td>
+              </tr>
+              <tr>
+                <td>Habitat</td>
+                <td>text</td>
+                <td><%= field_value_example('text') %></td>
+              </tr>
+              <tr>
+                <td>Substrate</td>
+                <td>text</td>
+                <td><%= field_value_example('text') %></td>
+              </tr>
+              <tr>
+                <td>Substrate Qualifier</td>
+                <td>text</td>
+                <td><%= field_value_example('text') %></td>
+              </tr>
+              <tr>
+                <td>Substrate Description</td>
+                <td>text</td>
+                <td><%= field_value_example('text') %></td>
+              </tr>
+              <tr>
+                <td>Geoprivacy</td>
+                <td>list</td>
+                <td><%= field_value_example('list', 'geoprivacy') %></td>
+              </tr>
+            </table>
+
+            <% if @projects.count > 0 %>
+              <p class="ui">If a project has custom fields, add these to the end of each row, in the following order.</p>
+              <% @project_templates.each do |project, project_fields| %>
+                <% unless project_fields.empty? %>
+                <p class="ui">For <strong><%= project %></strong>:</p>
+                <table cellspacing="0" border="0" cellpadding="0">
+                  <tr>
+                    <th>Field Name</th>
+                    <th>Field Type</th>
+                    <th>Value Format</th>
+                  </tr>
+                  <% project_fields.each do |field| %>
+                  <tr>
+                    <td><%= field.name %></td>
+                    <td><%= field.datatype %></td>
+                    <td><%= field_value_example(field.datatype) %></td>
+                  </tr>
+                  <% end %>
+                </table>
+                <% end %>
+              <% end %>
+            <% end %>
+          </li>
+        </ol>
+      </div>
+
+    </div>
+    <% end %>
   </div>
 </div>

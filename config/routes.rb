@@ -91,6 +91,7 @@ Inaturalist::Application.routes.draw do
   match 'observations/update' => 'observations#update', :as => :update_observations
   match 'observations/new/batch_csv' => 'observations#new_batch_csv', :as => :new_observation_batch_csv
   match 'observations/new/batch' => 'observations#new_batch', :as => :new_observation_batch
+  match 'observations/new/bulk_csv' => 'observations#new_bulk_csv', :as => :new_observation_bulk_csv
   match 'observations/edit/batch' => 'observations#edit_batch', :as => :edit_observation_batch
   match 'observations/delete_batch' => 'observations#delete_batch', :as => :delete_observation_batch, :via => :delete
   match 'observations/import' => 'observations#import', :as => :import_observations

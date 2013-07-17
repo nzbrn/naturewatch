@@ -867,6 +867,24 @@ class ObservationsController < ApplicationController
     end
   end
 
+  def new_bulk_csv
+    if params[:upload].blank? || params[:upload] && params[:upload][:datafile].blank?
+      flash[:error] = "You must select a CSV file to upload."
+      return redirect_to :action => "import"
+    end
+
+    # Copy to a temp directory.
+    path = "#{Rails.root}/tmp/#{params[:upload]['datafile'].original_filename}"
+    File.open(path, 'wb') { |f| f.write(params[:upload]['datafile'].read) }
+
+    # Send the filename to a background processor
+    Delayed::Job.enqueue(BulkObservationFile.new(path, params[:upload][:project_id], params[:upload][:coordinate_system], current_user))
+
+    # Notify the user that it's getting processed and return them to the upload screen.
+    flash[:notice] = 'Observation file has been queued for import.'
+    redirect_to import_observations_path
+  end
+
   # Edit a batch of observations
   def edit_batch
     observation_ids = params[:o].is_a?(String) ? params[:o].split(',') : []
@@ -901,6 +919,13 @@ class ObservationsController < ApplicationController
   
   # Import observations from external sources
   def import
+    if logged_in? && current_user.has_role?(:admin)
+      @projects = current_user.projects.collect { |p| [p.title, p.id] }
+      @project_templates = {}
+      current_user.projects.each do |p|
+        @project_templates[p.title] = p.observation_fields.order(:created_at)
+      end
+    end
   end
   
   def import_photos
