@@ -125,7 +125,7 @@ module ObservationsHelper
     options
   end
 
-  def field_value_example(datatype, list_requirements = nil)
+  def field_value_example(datatype)
     case datatype
     when 'text'
       'alphanumeric string'
