@@ -32,7 +32,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       import_file(observation_file, project, coord_system, user)
     rescue BulkObservationException => e
       # Email the uploader with exception details
-      UserMailer.bulk_observation_error(u, observation_file. e).deliver
+      UserMailer.bulk_observation_error(u, observation_file, e).deliver
     end
 
     # Email uploader to say that the upload has finished.
