@@ -1,6 +1,13 @@
 # Custom DelayedJob task for the bulk upload functionality.
 class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_system, :user)
-  class BulkObservationException < RuntimeError; end
+  class BulkObservationException < StandardError
+    attr_reader :reason, :row_count
+
+    def initialize(reason, row_count = nil)
+      @reason = reason
+      @row_count = row_count unless row_count.nil?
+    end
+  end
 
   BASE_ROW_COUNT = 24
 
@@ -15,7 +22,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
         project = Project.find(project_id)
         custom_field_count = project.observation_fields.size
         puts "project '#{project.title}'"
-        raise BulkObservationException, 'Specified project not found' if project.nil?
+        raise BulkObservationException('Specified project not found') if project.nil?
       end
 
       # Run a validation check over the file to make sure it's valid CSV.
@@ -25,7 +32,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       import_file(observation_file, project, coord_system, user)
     rescue BulkObservationException => e
       # Email the uploader with exception details
-      UserMailer.bulk_observation_error(u, observation_file. e.message).deliver
+      UserMailer.bulk_observation_error(u, observation_file. e).deliver
     end
 
     # Email uploader to say that the upload has finished.
@@ -33,6 +40,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
   end
 
   def validate_file(observation_file, custom_field_count)
+    row_count = 1
     # Parse the entire observation file looking for possible errors.
     CSV.parse(open(observation_file).read) do |row|
       next if row.blank?
@@ -48,20 +56,24 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
               item.to_s.gsub(problem, '').encode('UTF-8').strip
             rescue Encoding::UndefinedConversionError
               # If there's more than one encoding issue, just bail.
-              raise BulkObservationException, 'Multiple encoding issues encountered'
+              raise BulkObservationException.new('Multiple encoding issues encountered')
             end
           end
         end
       end
 
       # Check that the number of CSV fields is correct.
-      raise BulkObservationException, "Column count is not correct on at least one row (#{custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)" if row.count != (custom_field_count + BASE_ROW_COUNT)
+      raise BulkObservationException.new("Column count is not correct on at least one row (#{custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count) if row.count != (custom_field_count + BASE_ROW_COUNT)
+
+      # Increment the row count.
+      row_count = row_count + 1
     end
   end
 
   # Import the observations in the file, and add to the specified project.
   def import_file(observation_file, project = nil, coord_system = nil, user = nil)
     observations = []
+    row_count = 1
     ActiveRecord::Base.transaction do
       CSV.parse(open(observation_file).read) do |row|
         next if row.blank?
@@ -130,8 +142,11 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
           # Add this observation to a list for later importing to the project.
           observations << obs
+
+          # Increment the row count so we can tell them where any errors are.
+          row_count = row_count + 1
         rescue ActiveRecord::RecordInvalid
-          raise BulkObservationException, 'Invalid record encountered'
+          raise BulkObservationException.new('Invalid record encountered', row_count)
         end
       end
 
