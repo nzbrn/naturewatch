@@ -373,11 +373,11 @@ class ObservationsController < ApplicationController
       @observation.species_guess =  params[:taxon_name]
     end
     
-    #@observation_fields = ObservationField.
-    #  includes(:observation_field_values => {:observation => :user}).
-    #  where("users.id = ?", current_user).
-    #  limit(10).
-    #  order("observation_field_values.id DESC")
+    @observation_fields = ObservationField.
+      includes(:observation_field_values => :observation).
+      where("users.id = ?", current_user).
+      limit(10).
+      order("observation_field_values.id DESC")
     
     respond_to do |format|
       format.html do
