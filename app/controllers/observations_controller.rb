@@ -378,7 +378,7 @@ class ObservationsController < ApplicationController
       where("users.id = ?", current_user).
       group("observation_fields.id").
       limit(10).
-      order("observation_field_values.id DESC")
+      order("observation_fields.id DESC")
     
     respond_to do |format|
       format.html do
@@ -446,7 +446,7 @@ class ObservationsController < ApplicationController
       where("users.id = ?", current_user).
       group("observation_fields.id").
       limit(10).
-      order("observation_field_values.id DESC")
+      order("observation_fields.id DESC")
 
     if params[:partial] && EDIT_PARTIALS.include?(params[:partial])
       return render(:partial => params[:partial], :object => @observation,
@@ -1329,7 +1329,7 @@ class ObservationsController < ApplicationController
         where("users.id = ?", current_user).
         group("observation_fields.id").
         limit(10).
-        order("observation_field_values.id DESC")
+        order("observation_fields.id DESC")
     end
     render :layout => false
   end
