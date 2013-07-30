@@ -910,7 +910,7 @@ class ObservationsController < ApplicationController
   
   # Import observations from external sources
   def import
-    if logged_in? && current_user.has_role?(:admin)
+    if logged_in? && (current_user.has_role?(:admin) || current_user.has_role?(:pro) || current_user.has_role?(:curator))
       @projects = current_user.projects.collect { |p| [p.title, p.id] }
       @project_templates = {}
       current_user.projects.each do |p|
