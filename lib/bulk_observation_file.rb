@@ -17,11 +17,9 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       if project_id.blank?
         custom_field_count = 0
         project = nil
-        puts 'blank project'
       else
         project = Project.find(project_id)
         custom_field_count = project.observation_fields.size
-        puts "project '#{project.title}'"
         raise BulkObservationException('Specified project not found') if project.nil?
       end
 
@@ -32,11 +30,11 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       import_file(observation_file, project, coord_system, user)
     rescue BulkObservationException => e
       # Email the uploader with exception details
-      UserMailer.bulk_observation_error(u, observation_file, e).deliver
+      UserMailer.bulk_observation_error(user, observation_file, e).deliver
     end
 
     # Email uploader to say that the upload has finished.
-    UserMailer.bulk_observation_success(u, observation_file).deliver
+    UserMailer.bulk_observation_success(user, observation_file).deliver
   end
 
   def validate_file(observation_file, custom_field_count)
