@@ -911,9 +911,9 @@ class ObservationsController < ApplicationController
   # Import observations from external sources
   def import
     if logged_in? && (current_user.has_role?(:admin) || current_user.has_role?(:pro) || current_user.has_role?(:curator))
-      @projects = current_user.projects.collect { |p| [p.title, p.id] }
+      @projects = current_user.project_users.collect(&:project)
       @project_templates = {}
-      current_user.projects.each do |p|
+      @projects.each do |p|
         @project_templates[p.title] = p.observation_fields.order(:created_at)
       end
     end
