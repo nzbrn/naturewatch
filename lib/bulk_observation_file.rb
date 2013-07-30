@@ -28,13 +28,13 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
       # Start adding observations.
       import_file(observation_file, project, coord_system, user)
+
+      # Email uploader to say that the upload has finished.
+      UserMailer.bulk_observation_success(user, File.basename(observation_file)).deliver
     rescue BulkObservationException => e
       # Email the uploader with exception details
-      UserMailer.bulk_observation_error(user, observation_file, e).deliver
+      UserMailer.bulk_observation_error(user, File.basename(observation_file), e).deliver
     end
-
-    # Email uploader to say that the upload has finished.
-    UserMailer.bulk_observation_success(user, observation_file).deliver
   end
 
   def validate_file(observation_file, custom_field_count)
