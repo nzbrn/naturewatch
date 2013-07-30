@@ -170,7 +170,7 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
               <h3><label for="project">Add to Project</label></h3>
             </div>
             <div class="last column span-12">
-              <%= select 'upload', :project_id, @projects, { :include_blank => 'None' } %>
+              <%= select 'upload', :project_id, @projects, { :include_blank => 'None', :selected => (params[:project_id].to_i > 0 ? params[:project_id] : nil) } %>
             </div>
           </div>
           <div class="column field span-16">
