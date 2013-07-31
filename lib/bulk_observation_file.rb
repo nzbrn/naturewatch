@@ -121,7 +121,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
         # Are we adding to a specific project?
         unless project.nil?
           # Add the per-project fields if applicable.
-          field_count = BASE_ROW_COUNT + 1
+          field_count = BASE_ROW_COUNT
           project.observation_fields.order(:created_at).each do |field|
             obs.observation_field_values.build(:observation_field_id => field.id, :value => row[field_count] ||= 'Unknown')
             field_count += 1
