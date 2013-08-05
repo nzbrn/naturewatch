@@ -83,7 +83,8 @@ class Observation < ActiveRecord::Base
    'Birds' => [['Egg','birds_egg'],['Chick','birds_chick'], ['Juvenile','birds_juvenile'],['Adult','birds_adult']],
    'Mammals' => [['Juvenile','mammals_juvenile'],['Adult','mammals_adult']],
    'All' => [['Egg','all_egg'],['Juvenile','all_juvenile'], ['Adult','all_adult']]
-  } 
+  }
+  STAGE_OPTIONS_VALUES = STAGE_OPTIONS.collect { |k,v| v}.flatten.grep(/_/)
 
   PRIVATE = "private"
   OBSCURED = "obscured"
@@ -276,6 +277,10 @@ class Observation < ActiveRecord::Base
   validates_inclusion_of :cultivated,
     :in => CULTIVATED_OPTIONS,
     :message => "%{value} is not a valid cultivated option",
+    :allow_blank => true
+  validates_inclusion_of :stage,
+    :in => STAGE_OPTIONS_VALUES,
+    :message => "%{value} is not a valid stage option",
     :allow_blank => true
 
   validates_inclusion_of :coordinate_system,
