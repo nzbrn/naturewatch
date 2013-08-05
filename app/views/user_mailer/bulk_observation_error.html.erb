@@ -1,1 +1,9 @@
-Error: <%= @message %>, on row number <%= @row_count %>
+<p>Error: <%= @message %>, on row number <%= @row_count %></p>
+
+<% unless @errors.nil? %>
+<ul>
+  <% @errors.full_messages.each do |e| %>
+  <li><%= e %></li>
+  <% end %>
+</ul>
+<% end %>

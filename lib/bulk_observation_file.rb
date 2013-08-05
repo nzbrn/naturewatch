@@ -1,11 +1,12 @@
 # Custom DelayedJob task for the bulk upload functionality.
 class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_system, :user)
   class BulkObservationException < StandardError
-    attr_reader :reason, :row_count
+    attr_reader :reason, :row_count, :errors
 
-    def initialize(reason, row_count = nil)
-      @reason = reason
+    def initialize(reason, row_count = nil, errors = [])
+      @reason    = reason
       @row_count = row_count unless row_count.nil?
+      @errors    = errors    unless errors.empty?
     end
   end
 
@@ -15,16 +16,14 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     begin
       # Try to load the specified project.
       if project_id.blank?
-        custom_field_count = 0
         project = nil
       else
         project = Project.find(project_id)
-        custom_field_count = project.observation_fields.size
         raise BulkObservationException('Specified project not found') if project.nil?
       end
 
       # Run a validation check over the file to make sure it's valid CSV.
-      validate_file(observation_file, custom_field_count)
+      validate_file(observation_file, project, coord_system, user)
 
       # Start adding observations.
       import_file(observation_file, project, coord_system, user)
@@ -37,8 +36,10 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     end
   end
 
-  def validate_file(observation_file, custom_field_count)
+  def validate_file(observation_file, project, coord_system, user)
     row_count = 1
+    custom_field_count = project.nil? ? 0 : project.observation_fields.size
+
     # Parse the entire observation file looking for possible errors.
     CSV.parse(open(observation_file).read) do |row|
       next if row.blank?
@@ -63,6 +64,10 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       # Check that the number of CSV fields is correct.
       raise BulkObservationException.new("Column count is not correct on at least one row (#{custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count) if row.count != (custom_field_count + BASE_ROW_COUNT)
 
+      # Check the validity of the observation
+      obs = new_observation(row, project, user, coord_system)
+      raise BulkObservationException.new('Observation is not valid', row_count, obs.errors) unless obs.valid?
+
       # Increment the row count.
       row_count = row_count + 1
     end
@@ -76,58 +81,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       CSV.parse(open(observation_file).read) do |row|
         next if row.blank?
 
-        obs = Observation.new(
-          :user               => user,
-          :species_guess      => row[0],
-          :observed_on_string => row[1],
-          :description        => row[2],
-          :place_guess        => row[3],
-          :time_zone          => user.time_zone,
-          :tag_list           => row[6],
-          :sex                => row[7].try(:capitalize),
-          :stage              => row[8],
-          :cultivated         => row[9],
-          :number_individuals => row[10],
-          :sought_not_found   => row[11],
-          :geoprivacy         => row[12],
-        )
-
-        # If a coordinate system other than WGS84 is in use
-        # set the correct fields for transformation.
-        if coord_system.nil? || coord_system == 'wgs84'
-          obs.latitude  = row[4]
-          obs.longitude = row[5]
-        else
-          obs.geo_x = row[4]
-          obs.geo_y = row[5]
-          obs.coordinate_system = coord_system
-        end
-
-        # Add in the professional field set details
-        obs.pro_fieldset = ProFieldset.new(
-          :second_hand              => row[13],
-          :uncertain                => row[14],
-          :escaped                  => row[15],
-          :planted                  => row[16],
-          :ecologically_significant => row[17],
-          :observation_method       => row[18],
-          :host_name                => row[19],
-          :habitat                  => row[20],
-          :substrate                => row[21],
-          :substrate_qualifier      => row[22],
-          :substrate_description    => row[23],
-        )
-
-        # Are we adding to a specific project?
-        unless project.nil?
-          # Add the per-project fields if applicable.
-          field_count = BASE_ROW_COUNT
-          project.observation_fields.order(:position).each do |field|
-            obs.observation_field_values.build(:observation_field_id => field.id, :value => row[field_count] ||= 'Unknown')
-            field_count += 1
-          end
-        end
-
+        obs = new_observation(row, project, user, coord_system)
         begin
           # Skip some expensive post-save tasks
           obs.skip_identifications     = true
@@ -163,4 +117,97 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
     end
   end
+
+  def new_observation(row, project, user, coord_system)
+    obs = Observation.new(
+      :user               => user,
+      :species_guess      => row[0],
+      :observed_on_string => row[1],
+      :description        => row[2],
+      :place_guess        => row[3],
+      :time_zone          => user.time_zone,
+      :tag_list           => row[6],
+      :sex                => row[7],
+      :stage              => row[8],
+      :cultivated         => row[9],
+      :number_individuals => row[10],
+      :sought_not_found   => row[11],
+      :geoprivacy         => row[12],
+    )
+
+    # If a coordinate system other than WGS84 is in use
+    # set the correct fields for transformation.
+    if coord_system.nil? || coord_system == 'wgs84'
+      obs.latitude  = row[4]
+      obs.longitude = row[5]
+    else
+      obs.geo_x = row[4]
+      obs.geo_y = row[5]
+      obs.coordinate_system = coord_system
+    end
+
+    # Add in the professional field set details
+    obs.pro_fieldset = ProFieldset.new(
+      :second_hand              => row[13],
+      :uncertain                => row[14],
+      :escaped                  => row[15],
+      :planted                  => row[16],
+      :ecologically_significant => row[17],
+      :observation_method       => row[18],
+      :host_name                => row[19],
+      :habitat                  => row[20],
+      :substrate                => row[21],
+      :substrate_qualifier      => row[22],
+      :substrate_description    => row[23],
+    )
+
+    # Are we adding to a specific project?
+    unless project.nil?
+      # Add the per-project fields if applicable.
+      field_count = BASE_ROW_COUNT
+      project.observation_fields.order(:position).each do |field|
+        obs.observation_field_values.build(:observation_field_id => field.id, :value => row[field_count] ||= 'Unknown')
+        field_count += 1
+      end
+    end
+
+    obs
+  end
+end
+
+def generate_template(project = nil)
+  csv = [
+    'Lorem Ipsum', # Species Guess
+    'YYYY-MM-DD with optional time fragment', # Observed on string
+    'This is a description', # Description
+    'Place name guess', # Place Guess
+    'Tags,For,This,Observation', # Tags
+    "One of #{Observation::OBSERVATION_SEX.join(', ')}", # Sex
+    "One of #{Observation::STAGE_OPTIONS.collect { |k,v| v }.flatten.grep(/_/).join(', ')}", # Stage
+    "One of #{Observation::CULTIVATED_OPTIONS.join(', ')}", # Cultivated
+    5, # Number of individuals
+    "Either 'Yes' or 'No'", # Sought but not found
+    "One of #{Observation::GEOPRIVACIES.join(', ')} or empty for open/public", # Geoprivacy
+  ]
+
+  unless project.nil?
+    project_fields = project.observation_fields.order(:created_at).map do |field|
+      case field.datatype
+      when 'text', 'taxon'
+        'Text'
+      when 'time'
+        '12 or 24 hour format'
+      when 'date'
+        'YYYY-MM-DD'
+      when 'datetime'
+        Time.now.iso8601
+      when 'numeric'
+        'a positive, whole number'
+      end
+    end
+
+    csv.concat(project_fields)
+  end
+
+  csv
 end

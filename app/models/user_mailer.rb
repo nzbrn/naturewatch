@@ -20,8 +20,9 @@ class UserMailer < ActionMailer::Base
   def bulk_observation_error(user, observation_file, exception)
     setup_email(user)
     @subject << "The bulk import of #{observation_file} has failed."
-    @message = exception.reason
+    @message   = exception.reason
     @row_count = exception.row_count
+    @errors    = exception.errors
     mail(:to => "#{user.name} <#{user.email}>", :subject => @subject, :from => @from)
   end
 
