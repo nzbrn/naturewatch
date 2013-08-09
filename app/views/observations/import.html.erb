@@ -243,17 +243,17 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
               <tr>
                 <td>Sex</td>
                 <td>list</td>
-                <td><%= field_value_example('list') %></td>
+                <td>One of the following:<br/><%= Observation::OBSERVATION_SEX.join(', ') %></td>
               </tr>
               <tr>
                 <td>Stage</td>
                 <td>list</td>
-                <td><%= field_value_example('list') %></td>
+                <td>One of the following:<br/><%= Observation::STAGE_OPTIONS_VALUES.join(', ') %></td>
               </tr>
               <tr>
                 <td>Cultivated</td>
                 <td>list</td>
-                <td><%= field_value_example('list') %></td>
+                <td>One of the following:<br/><%= Observation::CULTIVATED_OPTIONS.join(', ') %></td>
               </tr>
               <tr>
                 <td>Number of individuals</td>
@@ -268,7 +268,7 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
               <tr>
                 <td>Geoprivacy</td>
                 <td>list</td>
-                <td><%= field_value_example('list') %></td>
+                <td>Leave blank for 'open' or one of <%= Observation::GEOPRIVACIES.join(', ') %></td>
               </tr>
               <tr>
                 <td>Second Hand</td>
