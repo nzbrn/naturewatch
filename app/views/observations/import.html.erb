@@ -58,7 +58,7 @@
     <ul>
       <li><a href="#photo_import"><span>Import from Photos</span></a></li>
       <li><a href="#csv_import"><span>Import from CSV</span></a></li>
-      <% if is_admin? || is_pro? || is_curator? %>
+      <% if current_user.has_role?(:admin) || current_user.has_role?(:pro) || (@project && @project.curated_by?(current_user)) %>
       <li><a href="#bulk_import"><span>Bulk CSV Import</span></a></li>
       <% end %>
     </ul>
@@ -144,7 +144,7 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
       </div>
     </div>
 
-    <% if current_user.has_role?(:admin) || current_user.has_role?(:pro) || current_user.has_role?(:curator) %>
+    <% if current_user.has_role?(:admin) || current_user.has_role?(:pro) || (@project && @project.curated_by?(current_user)) %>
     <div id="bulk_import">
       <div class="readable description">
         Upload a larger CSV file with observation data. This is similar to the CSV upload option
