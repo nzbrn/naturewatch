@@ -174,7 +174,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       # Add the per-project fields if applicable.
       field_count = BASE_ROW_COUNT
       project.observation_fields.order(:position).each do |field|
-        obs.observation_field_values.build(:observation_field_id => field.id, :value => row[field_count]) unless row[field_count].nil?
+        obs.observation_field_values.build(:observation_field_id => field.id, :value => row[field_count]) unless row[field_count].blank?
         field_count += 1
       end
     end
