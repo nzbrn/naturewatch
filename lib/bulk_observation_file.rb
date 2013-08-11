@@ -81,6 +81,11 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       CSV.parse(open(observation_file).read) do |row|
         next if row.blank?
 
+        # Add the observation file name as a tag for identification purposes.
+        tags = row[6].split(',')
+        tags << observation_file
+        row[6] = tags.join(',')
+
         obs = new_observation(row, project, user, coord_system)
         begin
           # Skip some expensive post-save tasks
