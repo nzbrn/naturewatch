@@ -11,6 +11,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
   end
 
   BASE_ROW_COUNT = 24
+  IMPORT_BATCH_SIZE = 1000
 
   def perform
     begin
@@ -77,33 +78,36 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
   def import_file(observation_file, project = nil, coord_system = nil, user = nil)
     observations = []
     row_count = 1
-    ActiveRecord::Base.transaction do
-      CSV.parse(open(observation_file).read) do |row|
-        next if row.blank?
+    csv = CSV.parse(open(observation_file).read)
+    csv.in_groups_of(IMPORT_BATCH_SIZE).each do |rows|
+      ActiveRecord::Base.transaction do
+        rows.each do |row|
+          next if row.blank?
 
-        # Add the observation file name as a tag for identification purposes.
-        tags = row[6].split(',')
-        tags << observation_file
-        row[6] = tags.join(',')
+          # Add the observation file name as a tag for identification purposes.
+          tags = row[6].split(',')
+          tags << observation_file
+          row[6] = tags.join(',')
 
-        obs = new_observation(row, project, user, coord_system)
-        begin
-          # Skip some expensive post-save tasks
-          obs.skip_identifications     = true
-          obs.skip_refresh_check_lists = true
-          obs.skip_refresh_lists       = true
-          obs.bulk_import              = true
+          obs = new_observation(row, project, user, coord_system)
+          begin
+            # Skip some expensive post-save tasks
+            obs.skip_identifications     = true
+            obs.skip_refresh_check_lists = true
+            obs.skip_refresh_lists       = true
+            obs.bulk_import              = true
 
-          # And save!
-          obs.save!
+            # And save!
+            obs.save!
 
-          # Add this observation to a list for later importing to the project.
-          observations << obs
+            # Add this observation to a list for later importing to the project.
+            observations << obs
 
-          # Increment the row count so we can tell them where any errors are.
-          row_count = row_count + 1
-        rescue ActiveRecord::RecordInvalid
-          raise BulkObservationException.new('Invalid record encountered', row_count)
+            # Increment the row count so we can tell them where any errors are.
+            row_count = row_count + 1
+          rescue ActiveRecord::RecordInvalid
+            raise BulkObservationException.new('Invalid record encountered', row_count)
+          end
         end
       end
 
@@ -119,7 +123,6 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
       # Do a mass refresh of the project taxa.
       Project.refresh_project_list(project_id, :taxa => observations.collect(&:taxon_id), :add_new_taxa => true)
-
     end
   end
 
