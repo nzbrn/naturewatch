@@ -166,48 +166,11 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       # Add the per-project fields if applicable.
       field_count = BASE_ROW_COUNT
       project.observation_fields.order(:position).each do |field|
-        obs.observation_field_values.build(:observation_field_id => field.id, :value => row[field_count] ||= 'Unknown')
+        obs.observation_field_values.build(:observation_field_id => field.id, :value => row[field_count]) unless row[field_count].nil?
         field_count += 1
       end
     end
 
     obs
   end
-end
-
-def generate_template(project = nil)
-  csv = [
-    'Lorem Ipsum', # Species Guess
-    'YYYY-MM-DD with optional time fragment', # Observed on string
-    'This is a description', # Description
-    'Place name guess', # Place Guess
-    'Tags,For,This,Observation', # Tags
-    "One of #{Observation::OBSERVATION_SEX.join(', ')}", # Sex
-    "One of #{Observation::STAGE_OPTIONS.collect { |k,v| v }.flatten.grep(/_/).join(', ')}", # Stage
-    "One of #{Observation::CULTIVATED_OPTIONS.join(', ')}", # Cultivated
-    5, # Number of individuals
-    "Either 'Yes' or 'No'", # Sought but not found
-    "One of #{Observation::GEOPRIVACIES.join(', ')} or empty for open/public", # Geoprivacy
-  ]
-
-  unless project.nil?
-    project_fields = project.observation_fields.order(:created_at).map do |field|
-      case field.datatype
-      when 'text', 'taxon'
-        'Text'
-      when 'time'
-        '12 or 24 hour format'
-      when 'date'
-        'YYYY-MM-DD'
-      when 'datetime'
-        Time.now.iso8601
-      when 'numeric'
-        'a positive, whole number'
-      end
-    end
-
-    csv.concat(project_fields)
-  end
-
-  csv
 end
