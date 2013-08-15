@@ -85,7 +85,11 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
           next if row.blank?
 
           # Add the observation file name as a tag for identification purposes.
-          tags = row[6].split(',')
+          if row[6].blank?
+            tags = []
+          else
+            tags = row[6].split(',')
+          end
           tags << observation_file
           row[6] = tags.join(',')
 
