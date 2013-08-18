@@ -90,7 +90,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
           else
             tags = row[6].split(',')
           end
-          tags << observation_file
+          tags << File.basename(observation_file)
           row[6] = tags.join(',')
 
           obs = new_observation(row, project, user, coord_system)
