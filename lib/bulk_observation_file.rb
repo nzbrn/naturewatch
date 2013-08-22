@@ -67,7 +67,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
       # Check the validity of the observation
       obs = new_observation(row, project, user, coord_system)
-      raise BulkObservationException.new('Observation is not valid', row_count, obs.errors) unless obs.valid?
+      raise BulkObservationException.new('Observation is not valid', row_count, obs.errors.full_messages) unless obs.valid?
 
       # Increment the row count.
       row_count = row_count + 1

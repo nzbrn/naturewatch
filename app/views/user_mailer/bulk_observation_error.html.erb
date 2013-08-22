@@ -2,7 +2,7 @@
 
 <% unless @errors.nil? %>
 <ul>
-  <% @errors.full_messages.each do |e| %>
+  <% @errors.each do |e| %>
   <li><%= e %></li>
   <% end %>
 </ul>
