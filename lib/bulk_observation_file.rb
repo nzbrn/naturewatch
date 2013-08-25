@@ -38,11 +38,11 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
   end
 
   def validate_file(observation_file, project, coord_system, user)
-    row_count = 1
+    row_count = 0
     custom_field_count = project.nil? ? 0 : project.observation_fields.size
 
     # Parse the entire observation file looking for possible errors.
-    CSV.parse(open(observation_file).read) do |row|
+    CSV.parse(open(observation_file).read, :skip_lines => /\A\s*#/) do |row|
       next if row.blank?
       row = row.map do |item|
         if item.blank?
@@ -63,22 +63,24 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       end
 
       # Check that the number of CSV fields is correct.
-      raise BulkObservationException.new("Column count is not correct on at least one row (#{custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count) if row.count != (custom_field_count + BASE_ROW_COUNT)
+      raise BulkObservationException.new("Column count is not correct on at least one row (#{custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count + 1) if row.count != (custom_field_count + BASE_ROW_COUNT)
 
       # Check the validity of the observation
       obs = new_observation(row, project, user, coord_system)
-      raise BulkObservationException.new('Observation is not valid', row_count, obs.errors.full_messages) unless obs.valid?
+      raise BulkObservationException.new('Observation is not valid', row_count + 1, obs.errors.full_messages) unless obs.valid?
 
       # Increment the row count.
       row_count = row_count + 1
     end
+
+    raise BulkObservationException.new('Observation file was empty') if row_count == 0
   end
 
   # Import the observations in the file, and add to the specified project.
   def import_file(observation_file, project = nil, coord_system = nil, user = nil)
     observations = []
     row_count = 1
-    csv = CSV.parse(open(observation_file).read)
+    csv = CSV.parse(open(observation_file).read, :skip_lines => /\A\s*#/)
     csv.in_groups_of(IMPORT_BATCH_SIZE).each do |rows|
       ActiveRecord::Base.transaction do
         rows.each do |row|

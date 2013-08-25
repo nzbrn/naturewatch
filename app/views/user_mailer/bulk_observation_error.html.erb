@@ -1,4 +1,4 @@
-<p>Error: <%= @message %>, on row number <%= @row_count %></p>
+<p>Error: <%= @message %><%= ", on row number #{@row_count}" if @row_count %></p>
 
 <% unless @errors.nil? %>
 <ul>
