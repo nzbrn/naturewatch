@@ -212,7 +212,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     )
 
     # Are we adding to a specific project?
-    unless project.nil?
+    unless @project.nil?
       # Add the per-project fields if applicable.
       field_count = BASE_ROW_COUNT
       @project.observation_fields.order(:position).each do |field|
