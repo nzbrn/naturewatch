@@ -79,7 +79,15 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     row_count = 0
 
     # Parse the entire observation file looking for possible errors.
-    CSV.parse(open(@observation_file).read, @csv_options) do |row|
+    rows = CSV.parse(open(@observation_file).read, @csv_options)
+
+    # Skip the header row - this is very clumsy, but using the built in
+    # header skipping doesn't allow the use of Array.in_groups_of below
+    # and causes issues with the field UTF-8 encoding above.
+    rows.shift
+
+    # Iterate over each row
+    rows.each do |row|
       next if row.blank?
       row = check_encoding(row)
 
@@ -101,7 +109,10 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
   def import_file
     observations = []
     row_count = 1
+
+    # Load the entire file and skip the header row
     csv = CSV.parse(open(@observation_file).read, @csv_options)
+    csv.shift
 
     # Split the rows into groups of the IMPORT_BATCH_FILE to
     # minimize wasted time in the case of errors.
