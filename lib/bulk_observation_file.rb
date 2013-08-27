@@ -6,12 +6,18 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     def initialize(reason, row_count = nil, errors = [])
       @reason    = reason
       @row_count = row_count unless row_count.nil?
-      @errors    = errors    unless errors.empty?
+
+      if errors.empty?
+        @errors = [reason]
+      else
+        @errors = errors
+      end
     end
   end
 
-  BASE_ROW_COUNT = 24
+  BASE_ROW_COUNT    = 24
   IMPORT_BATCH_SIZE = 1000
+  MAX_ERROR_COUNT   = 10
 
   attr_reader :observation_file, :project, :coord_system, :user, :csv_options, :custom_field_count
 
@@ -51,7 +57,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       UserMailer.delay.bulk_observation_success(@user, File.basename(@observation_file))
     rescue BulkObservationException => e
       # Email the uploader with exception details
-      UserMailer.delay.bulk_observation_error(@user, File.basename(@observation_file), e)
+      UserMailer.bulk_observation_error(@user, File.basename(@observation_file), e).deliver
     end
   end
 
@@ -64,12 +70,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
           item.to_s.encode('UTF-8').strip
         rescue Encoding::UndefinedConversionError => e
           problem = e.message[/"(.+)" from/, 1]
-          begin
-            item.to_s.gsub(problem, '').encode('UTF-8').strip
-          rescue Encoding::UndefinedConversionError
-            # If there's more than one encoding issue, just bail.
-            raise BulkObservationException.new('Multiple encoding issues encountered')
-          end
+          item.to_s.gsub(problem, '').encode('UTF-8').strip
         end
       end
     end
@@ -77,6 +78,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
   def validate_file
     row_count = 0
+    errors = []
 
     # Parse the entire observation file looking for possible errors.
     rows = CSV.parse(open(@observation_file).read, @csv_options)
@@ -89,19 +91,29 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     # Iterate over each row
     rows.each do |row|
       next if row.blank?
-      row = check_encoding(row)
+
+      # Capture a second attempt encoding error
+      begin
+        row = check_encoding(row)
+      rescue Encoding::UndefinedConversionError => e
+        errors << e
+      end
 
       # Check that the number of CSV fields is correct.
-      raise BulkObservationException.new("Column count is not correct on at least one row (#{@custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count + 1) if row.count != (@custom_field_count + BASE_ROW_COUNT)
+      errors << BulkObservationException.new("Column count is not correct (#{@custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count + 1) if row.count != (@custom_field_count + BASE_ROW_COUNT)
 
       # Check the validity of the observation
       obs = new_observation(row)
-      raise BulkObservationException.new('Observation is not valid', row_count + 1, obs.errors.full_messages) unless obs.valid?
+      errors << BulkObservationException.new('Observation is not valid', row_count + 1, obs.errors.full_messages) unless obs.valid?
 
       # Increment the row count.
       row_count = row_count + 1
+
+      # Stop if we have reached our max error count
+      break if errors.count >= MAX_ERROR_COUNT
     end
 
+    raise BulkObservationException.new('Too many errors encountered', nil, errors) if errors.count > 0
     raise BulkObservationException.new('Observation file was empty') if row_count == 0
   end
 
@@ -215,8 +227,15 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     unless @project.nil?
       # Add the per-project fields if applicable.
       field_count = BASE_ROW_COUNT
-      @project.observation_fields.order(:position).each do |field|
-        obs.observation_field_values.build(:observation_field_id => field.id, :value => row[field_count]) unless row[field_count].blank?
+      ProjectObservationField.where(:project_id => @project).order(:position).each do |field|
+        if row[field_count].blank?
+          if field.required
+            obs.custom_field_errors ||= []
+            obs.custom_field_errors << "#{field.observation_field.name} is required"
+          end
+        else
+          obs.observation_field_values.build(:observation_field_id => field.observation_field_id, :value => row[field_count])
+        end
         field_count += 1
       end
     end

@@ -48,6 +48,9 @@ class Observation < ActiveRecord::Base
   attr_accessor :geo_x
   attr_accessor :geo_y
 
+  # custom project field errors
+  attr_accessor :custom_field_errors
+
   serialize :legacy
   
   MASS_ASSIGNABLE_ATTRIBUTES = [:make_license_default, :make_licenses_same]
@@ -255,7 +258,8 @@ class Observation < ActiveRecord::Base
   
   validate :must_be_in_the_past,
            :must_not_be_a_range,
-           :stage_must_be_valid_for_taxon
+           :stage_must_be_valid_for_taxon,
+           :check_custom_field_errors
   
   validates_numericality_of :latitude,
     :allow_blank => true, 
@@ -1683,5 +1687,11 @@ class Observation < ActiveRecord::Base
   def self.generate_csv_for_cache_key(record, options = {})
     "#{record.class.name.underscore}_#{record.id}"
   end
-  
+
+  def check_custom_field_errors
+    unless custom_field_errors.nil?
+      errors[:base] = errors[:base] + custom_field_errors
+    end
+  end
+
 end
