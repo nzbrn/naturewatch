@@ -23,9 +23,12 @@ class UserMailer < ActionMailer::Base
     @message   = exception.reason
 
     # enumerate the exceptions and collate error messages
-    @errors = []
+    @errors = {}
     exception.errors.each do |e|
-      @errors[e.row_count] = e.errors
+      e.errors.map do |error|
+        @errors[error] ||= []
+        @errors[error] << e.row_count
+      end
     end
 
     #@row_count = exception.row_count
