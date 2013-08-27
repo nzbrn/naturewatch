@@ -19,7 +19,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
   IMPORT_BATCH_SIZE = 1000
   MAX_ERROR_COUNT   = 10
 
-  attr_reader :observation_file, :project, :coord_system, :user, :csv_options, :custom_field_count
+  attr_accessor :observation_file, :project, :coord_system, :user, :csv_options, :custom_field_count
 
   def initialize(observation_file, project_id, coord_system, user)
     @observation_file = observation_file
@@ -57,7 +57,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       UserMailer.delay.bulk_observation_success(@user, File.basename(@observation_file))
     rescue BulkObservationException => e
       # Email the uploader with exception details
-      UserMailer.bulk_observation_error(@user, File.basename(@observation_file), e).deliver
+      UserMailer.delay.bulk_observation_error(@user, File.basename(@observation_file), e)
     end
   end
 
