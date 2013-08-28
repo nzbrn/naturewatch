@@ -273,23 +273,23 @@ class Observation < ActiveRecord::Base
     :allow_blank => true, 
     :greater_than_or_equal_to => 1, 
     :only_integer => true,
-    :message => "can only be whole number greater than zero."
+    :message => "can only be a whole number greater than zero."
   validates_inclusion_of :sex,
     :in => OBSERVATION_SEX,
-    :message => "%{value} is not a valid sex",
+    :message => "'%{value}' is not a valid sex",
     :allow_blank => true
   validates_inclusion_of :cultivated,
     :in => CULTIVATED_OPTIONS,
-    :message => "%{value} is not a valid cultivated option",
+    :message => "'%{value}' is not a valid cultivated option",
     :allow_blank => true
   validates_inclusion_of :stage,
     :in => STAGE_OPTIONS_VALUES,
-    :message => "%{value} is not a valid stage option",
+    :message => "'%{value}' is not a valid stage option",
     :allow_blank => true
 
   validates_inclusion_of :coordinate_system,
     :in => proc { CONFIG.coordinate_systems.keys },
-    :message => "%{value} is not a valid coordinate system",
+    :message => "'%{value}' is not a valid coordinate system",
     :allow_blank => true
   # See /config/locale/en.yml for field labels for `geo_x` and `geo_y`
   validates_numericality_of :geo_x,

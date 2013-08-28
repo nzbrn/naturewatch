@@ -342,7 +342,7 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
                   <tr>
                     <td><%= field.name %></td>
                     <td><%= field.datatype %></td>
-                    <td><%= field_value_example(field.datatype) %></td>
+                    <td><%= field_value_example(field.datatype, field.allowed_values, field.id) %></td>
                   </tr>
                   <% end %>
                 </table>

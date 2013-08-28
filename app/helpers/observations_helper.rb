@@ -125,23 +125,34 @@ module ObservationsHelper
     options
   end
 
-  def field_value_example(datatype)
-    case datatype
-    when 'text'
-      'alphanumeric string'
-    when 'datetime', 'date'
-      'YYYY-MM-DD HH:MM'
-    when 'coordinate'
-      'dd.dddd'
-    when 'boolean'
-      'yes or no'
-    when 'list'
-      'limited set of options, usually alphanumeric'
-    when 'number'
-      'positive whole number'
+  def field_value_example(datatype, allowed_values = nil, field_id = nil)
+    str = if allowed_values.blank?
+      case datatype
+      when 'text'
+        'alphanumeric string'
+      when 'datetime', 'date'
+        'YYYY-MM-DD HH:MM'
+      when 'coordinate'
+        'dd.dddd'
+      when 'boolean'
+        'yes or no'
+      when 'list'
+        'limited set of options, usually alphanumeric'
+      when 'number'
+        'positive whole number'
+      else
+        nil
+      end
     else
-      nil
+      "One of #{allowed_values.split('|').to_sentence(:two_words_connector => ' or ', :last_word_connector => ' or ')}"
     end
+
+    unless field_id.nil?
+      proj_obs_field = ProjectObservationField.find_by_observation_field_id(field_id)
+      str = "#{str}, #{content_tag('strong', 'required')}".html_safe if proj_obs_field.required
+    end
+
+    str
   end
 
 end
