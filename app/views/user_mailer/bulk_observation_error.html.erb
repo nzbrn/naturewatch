@@ -1,12 +1,17 @@
 <p>Error: <%= @message %></p>
 
 <% unless @errors.nil? %>
-<ul>
-  <% @errors.each do |error, rows| %>
-  <li>
-    <%= error %>
-    <ul><li>Rows: <%= rows.join(', ') %></li></ul>
-  </li>
+  <% @errors.each do |field, errors| %>
+  <ul>
+    <% errors.each do |error, rows|  %>
+    <li>
+      <%= error %>
+      <ul><li>Rows: <%= rows.join(', ') %></li></ul>
+    </li>
+    <% end %>
+    <% unless @field_options[field].blank? %>
+    <li>Valid options are: <%= @field_options[field] %></li>
+    <% end %>
+  </ul>
   <% end %>
-</ul>
 <% end %>

@@ -23,16 +23,25 @@ class UserMailer < ActionMailer::Base
     @message   = exception.reason
 
     # enumerate the exceptions and collate error messages
+    @field_options = {}
     @errors = {}
     exception.errors.each do |e|
-      e.errors.map do |error|
-        @errors[error] ||= []
-        @errors[error] << e.row_count
+      if e.errors.is_a?(ActiveModel::Errors)
+        e.errors.each do |field, error|
+          @errors[field] ||= {}
+          full_error = e.errors.full_message(field, error)
+          @errors[field][full_error] ||= []
+          @errors[field][full_error] << e.row_count
+          @field_options[field] = Observation.field_allowed_values(field)
+        end
+      else
+        e.errors.each do |error|
+          @errors[error] ||= []
+          @errors[error] << e.row_count
+        end
       end
     end
 
-    #@row_count = exception.row_count
-    #@errors    = exception.errors
     mail(:to => "#{user.name} <#{user.email}>", :subject => @subject, :from => @from)
   end
 

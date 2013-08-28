@@ -1694,4 +1694,19 @@ class Observation < ActiveRecord::Base
     end
   end
 
+  def self.field_allowed_values(field)
+    case field
+    when :sex
+      Observation::OBSERVATION_SEX
+    when :stage
+      Observation::STAGE_OPTIONS_VALUES
+    when :cultivated
+      Observation::CULTIVATED_OPTIONS
+    when :geoprivacy
+      Observation::GEOPRIVACIES + ["leave blank for 'open'"]
+    else
+      []
+    end.to_sentence(:two_words_connector => ' or ', :last_word_connector => ' or ')
+  end
+
 end

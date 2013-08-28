@@ -37,7 +37,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     else
       @project = Project.find(project_id)
       if @project.nil?
-        e = BulkObservationException.new('Specified project not found') if @project.nil?
+        e = BulkObservationException.new('Specified project not found')
         UserMailer.delay.bulk_observation_error(user, File.basename(observation_file), e)
       end
     end
@@ -104,7 +104,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
       # Check the validity of the observation
       obs = new_observation(row)
-      errors << BulkObservationException.new('Observation is not valid', row_count + 1, obs.errors.full_messages) unless obs.valid?
+      errors << BulkObservationException.new('Observation is not valid', row_count + 1, obs.errors) unless obs.valid?
 
       # Increment the row count.
       row_count = row_count + 1
