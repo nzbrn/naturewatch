@@ -28,7 +28,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
     # CSV options
     @csv_options = {
-      :skip_lines => /\A\s*#/,
+      #:skip_lines => /\A\s*#/,
     }
 
     # Try to load the specified project.
@@ -90,7 +90,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
     # Iterate over each row
     rows.each do |row|
-      next if row.blank?
+      next if skip_row?(row)
 
       # Capture a second attempt encoding error
       begin
@@ -131,7 +131,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     csv.in_groups_of(IMPORT_BATCH_SIZE).each do |rows|
       ActiveRecord::Base.transaction do
         rows.each do |row|
-          next if row.blank?
+          next if skip_row?(row)
           row = check_encoding(row)
 
           # Add the observation file name as a tag for identification purposes.
@@ -242,4 +242,9 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
     obs
   end
+
+  def skip_row?(row)
+    row.blank? || !(row =~ /\A\s*#/).nil?
+  end
+
 end
