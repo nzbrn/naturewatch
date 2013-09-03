@@ -56,8 +56,11 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       # Email uploader to say that the upload has finished.
       UserMailer.delay.bulk_observation_success(@user, File.basename(@observation_file))
     rescue BulkObservationException => e
+      # Collate the errors into a hash for emailing
+      error_details = collate_errors(e)
+
       # Email the uploader with exception details
-      UserMailer.delay.bulk_observation_error(@user, File.basename(@observation_file), e)
+      UserMailer.delay.bulk_observation_error(@user, File.basename(@observation_file), error_details)
     end
   end
 
@@ -245,6 +248,30 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
   def skip_row?(row)
     row.blank? || !(row =~ /\A\s*#/).nil?
+  end
+
+  def collate_errors(exception)
+    # enumerate the exceptions and collate error messages
+    field_options = {}
+    errors = {}
+    exception.errors.each do |e|
+      if e.errors.is_a?(ActiveModel::Errors)
+        e.errors.each do |field, error|
+          errors[field] ||= {}
+          full_error = e.errors.full_message(field, error)
+          errors[field][full_error] ||= []
+          errors[field][full_error] << e.row_count
+          field_options[field] = Observation.field_allowed_values(field)
+        end
+      else
+        e.errors.each do |error|
+          errors[error] ||= []
+          errors[error] << e.row_count
+        end
+      end
+    end
+
+    { :reason => exception.reason, :errors => errors, :field_options => field_options }
   end
 
 end
