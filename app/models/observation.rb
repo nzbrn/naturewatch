@@ -1690,7 +1690,7 @@ class Observation < ActiveRecord::Base
 
   def check_custom_field_errors
     unless custom_field_errors.nil?
-      errors[:base] = errors[:base] + custom_field_errors
+      custom_field_errors.each { |e| errors.add(:base, e) }
     end
   end
 

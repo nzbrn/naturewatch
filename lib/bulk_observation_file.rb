@@ -8,7 +8,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       @row_count = row_count unless row_count.nil?
 
       if errors.empty?
-        @errors = [reason]
+        @errors = reason
       else
         @errors = errors
       end
