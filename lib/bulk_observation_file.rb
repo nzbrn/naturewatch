@@ -80,7 +80,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
   end
 
   def validate_file
-    row_count = 0
+    row_count = 1
     errors = []
 
     # Parse the entire observation file looking for possible errors.
@@ -123,7 +123,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
   # Import the observations in the file, and add to the specified project.
   def import_file
     observations = []
-    row_count = 1
+    row_count = 2
 
     # Load the entire file and skip the header row
     csv = CSV.parse(open(@observation_file).read, @csv_options)
