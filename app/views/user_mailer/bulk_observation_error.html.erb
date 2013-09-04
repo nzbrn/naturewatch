@@ -6,7 +6,7 @@
     <% errors.each do |error, rows|  %>
     <li>
       <%= error %>
-      <ul><li>Rows: <%= rows.join(', ') %></li></ul>
+      <ul><li>Row(s): <%= rows.join(', ') %></li></ul>
     </li>
     <% end %>
     <% unless @field_options[field].blank? %>

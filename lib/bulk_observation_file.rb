@@ -116,8 +116,8 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       break if errors.count >= MAX_ERROR_COUNT
     end
 
-    raise BulkObservationException.new('Too many errors encountered', nil, errors) if errors.count > 0
-    raise BulkObservationException.new('Observation file was empty') if row_count == 0
+    raise BulkObservationException.new('Too many errors encountered:', nil, errors) if errors.count > 0
+    raise BulkObservationException.new('Observation file was empty.') if row_count == 0
   end
 
   # Import the observations in the file, and add to the specified project.
