@@ -133,7 +133,7 @@ module ObservationsHelper
       when 'datetime', 'date'
         'YYYY-MM-DD HH:MM'
       when 'coordinate'
-        'dd.dddd'
+        'dd.dddd (long/lat) or ddddddd (east/north)'
       when 'boolean'
         'yes or no'
       when 'list'

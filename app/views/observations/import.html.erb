@@ -147,8 +147,8 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
     <% if current_user.has_role?(:admin) || current_user.has_role?(:pro) || (@project && @project.curated_by?(current_user)) %>
     <div id="bulk_import">
       <div class="readable description">
-        Upload a larger CSV file with observation data. This is similar to the CSV upload option
-        except that this allows a larger data set (10k rows) to be imported. This is also done
+        Upload a larger CSV file with observation data. This is similar to the CSV upload option,
+        except that this allows a larger data set (10,000 rows) to be imported. This is also done
         as a background process, and you will be sent an email on completion.
       </div>
 
@@ -192,9 +192,9 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
       <div class="description">
         <h3>Rules &amp; Formatting</h3>
         <ol>
-          <li>A header row must be included</li>
-          <li>Only files with 10,000 rows at a time, please</li>
-          <li>Make sure it is well formed CSV - an export from any spreadsheet application (eg Excel, LibreOffice) should provide this.</li>
+          <li>A header row must be included.</li>
+          <li>Only files with 10,000 rows at a time, please.</li>
+          <li>Make sure it is a well formed CSV file - an export from any spreadsheet application (eg Microsoft Excel, LibreOffice Calc) should provide this.</li>
           <li>The file must be comma-separated - a tab-separated file will not work.</li>
           <li>Only one coordinate system can be used per file, otherwise incorrect conversion or display will occur.</li>
           <li>
@@ -226,12 +226,12 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
                 <td><%= field_value_example('text') %></td>
               </tr>
               <tr>
-                <td>Latitude</td>
+                <td>Latitude or Northing</td>
                 <td>coordinate</td>
                 <td><%= field_value_example('coordinate') %></td>
               </tr>
               <tr>
-                <td>Longitude</td>
+                <td>Longitude or Easting</td>
                 <td>coordinate</td>
                 <td><%= field_value_example('coordinate') %></td>
               </tr>
@@ -261,7 +261,7 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
                 <td><%= field_value_example('number') %></td>
               </tr>
               <tr>
-                <td>Sought by not found</td>
+                <td>Sought but not found</td>
                 <td>boolean</td>
                 <td><%= field_value_example('boolean') %></td>
               </tr>
