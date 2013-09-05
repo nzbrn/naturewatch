@@ -148,13 +148,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
           obs = new_observation(row)
           begin
-            # Skip some expensive post-save tasks
-            obs.skip_identifications     = true
-            obs.skip_refresh_check_lists = true
-            obs.skip_refresh_lists       = true
-            obs.bulk_import              = true
-
-            # And save!
+            # Try to save the observation
             obs.save!
 
             # Add this observation to a list for later importing to the project.
@@ -242,6 +236,12 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
         field_count += 1
       end
     end
+
+    # Skip some expensive post-save tasks
+    obs.skip_identifications     = true
+    obs.skip_refresh_check_lists = true
+    obs.skip_refresh_lists       = true
+    obs.bulk_import              = true
 
     obs
   end

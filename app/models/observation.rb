@@ -63,6 +63,7 @@ class Observation < ActiveRecord::Base
   COORDINATE_REGEX = /[^\d\,]*?(#{FLOAT_REGEX})[^\d\,]*?/
   LAT_LON_SEPARATOR_REGEX = /[\,\s]\s*/
   LAT_LON_REGEX = /#{COORDINATE_REGEX}#{LAT_LON_SEPARATOR_REGEX}#{COORDINATE_REGEX}/
+  ISO8601_REGEX = /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|0[1-9]|[1-2][0-9])T(2[0-3]|[0-1][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[0-1][0-9]):[0-5][0-9])?$/
   OBSERVATION_SEX = ["Male", "Female" ,"In Pair", "Mixed"]
   CULTIVATED_OPTIONS = %w[Yes No Maybe]
   NZBRN_ICONIC = {
@@ -261,6 +262,9 @@ class Observation < ActiveRecord::Base
            :stage_must_be_valid_for_taxon,
            :check_custom_field_errors
   
+  # Only check that the date format is correct during the bulk import
+  validate :check_date_format, :if => proc { |o| o.bulk_import == true }
+
   validates_numericality_of :latitude,
     :allow_blank => true, 
     :less_than_or_equal_to => 90, 
@@ -1707,6 +1711,10 @@ class Observation < ActiveRecord::Base
     else
       []
     end.to_sentence(:two_words_connector => ' or ', :last_word_connector => ' or ')
+  end
+
+  def check_date_format
+    errors.add(:observed_on_string, 'must use the ISO8601 format') if ISO8601_REGEX.match(observed_on_string).nil?
   end
 
 end
