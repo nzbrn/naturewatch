@@ -873,7 +873,11 @@ class ObservationsController < ApplicationController
 
     # Notify the user that it's getting processed and return them to the upload screen.
     flash[:notice] = 'Observation file has been queued for import.'
-    redirect_to import_observations_path
+    if params[:upload][:project_id].blank?
+      redirect_to import_observations_path
+    else
+      redirect_to(import_observations_path(:project_id => params[:upload][:project_id]))
+    end
   end
 
   # Edit a batch of observations
