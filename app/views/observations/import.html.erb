@@ -179,6 +179,7 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
             </div>
             <div class="last column span-12">
               <%= select 'upload', :coordinate_system, { 'WGS84' => 'wgs84' }.update(coordinate_system_select_options) %>
+              <span class="coords_tip_target helptip" rel="#coords_tip"></span><div id="coords_tip" style="display:none">Content for coordinate system tip</div>
             </div>
           </div>
           <div class="column span-16">
