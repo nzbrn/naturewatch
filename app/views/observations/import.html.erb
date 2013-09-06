@@ -1,7 +1,8 @@
 <% content_for(:title) do -%>Import Observations<% end -%>
 <% content_for(:extracss) do -%>
   <%= stylesheet_link_tag 'observations/new', 
-                          "jquery/ui.tabs.css" %>
+                          "jquery/ui.tabs.css",
+                          "jquery/ui.accordion.css" %>
   <style type="text/css" media="screen">
     #pageheader p{margin-bottom:0;}
     #tabs div .description.readable{margin-bottom:10px;}
@@ -22,6 +23,7 @@
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function() {
       $('#tabs').tabs();
+      $('#accordion').accordion({ collapsible: true, header: 'h3', heightStyle: 'content' });
       
       $('#photos').photoSelector({
         <%- if @default_photo_identity_url -%>
@@ -152,7 +154,7 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
         as a background process, and you will be sent an email on completion.
       </div>
 
-      <div class="column">
+      <div class="column" style="float:none">
         <%= form_tag(new_observation_bulk_csv_path,
                      :id => 'new_bulk_form',
                      :class => 'clear observationform',
@@ -191,167 +193,171 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
       </div>
 
       <div class="description">
-        <h3>Rules &amp; Formatting</h3>
-        <ol>
-          <li>A header row must be included.</li>
-          <li>Only files with 10,000 rows at a time, please.</li>
-          <li>Make sure it is a well formed CSV file - an export from any spreadsheet application (eg Microsoft Excel, LibreOffice Calc) should provide this.</li>
-          <li>The file must be comma-separated - a tab-separated file will not work.</li>
-          <li>Only one coordinate system can be used per file, otherwise incorrect conversion or display will occur.</li>
-          <li>
-            <p class="ui">We can only understand CSV in the following format:</p>
-            <table cellspacing="0" border="0" cellpadding="0">
-              <tr>
-                <th>Field Name</th>
-                <th>Field Type</th>
-                <th>Value Format</th>
-              </tr>
-              <tr>
-                <td>Taxon name</td>
-                <td>text</td>
-                <td><%= field_value_example('text') %></td>
-              </tr>
-              <tr>
-                <td>Date observed</td>
-                <td>date and time</td>
-                <td><%= field_value_example('datetime') %></td>
-              </tr>
-              <tr>
-                <td>Description</td>
-                <td>text</td>
-                <td><%= field_value_example('text') %></td>
-              </tr>
-              <tr>
-                <td>Place name</td>
-                <td>text</td>
-                <td><%= field_value_example('text') %></td>
-              </tr>
-              <tr>
-                <td>Latitude or Northing</td>
-                <td>coordinate</td>
-                <td><%= field_value_example('coordinate') %></td>
-              </tr>
-              <tr>
-                <td>Longitude or Easting</td>
-                <td>coordinate</td>
-                <td><%= field_value_example('coordinate') %></td>
-              </tr>
-              <tr>
-                <td>Tags</td>
-                <td>text</td>
-                <td><%= field_value_example('text') %></td>
-              </tr>
-              <tr>
-                <td>Sex</td>
-                <td>list</td>
-                <td>One of the following:<br/><%= Observation::OBSERVATION_SEX.join(', ') %></td>
-              </tr>
-              <tr>
-                <td>Stage</td>
-                <td>list</td>
-                <td>One of the following:<br/><%= Observation::STAGE_OPTIONS_VALUES.join(', ') %></td>
-              </tr>
-              <tr>
-                <td>Cultivated</td>
-                <td>list</td>
-                <td>One of the following:<br/><%= Observation::CULTIVATED_OPTIONS.join(', ') %></td>
-              </tr>
-              <tr>
-                <td>Number of individuals</td>
-                <td>number</td>
-                <td><%= field_value_example('number') %></td>
-              </tr>
-              <tr>
-                <td>Sought but not found</td>
-                <td>boolean</td>
-                <td><%= field_value_example('boolean') %></td>
-              </tr>
-              <tr>
-                <td>Geoprivacy</td>
-                <td>list</td>
-                <td>Leave blank for 'open' or one of <%= Observation::GEOPRIVACIES.join(', ') %></td>
-              </tr>
-              <tr>
-                <td>Second Hand</td>
-                <td>boolean</td>
-                <td><%= field_value_example('boolean') %></td>
-              </tr>
-              <tr>
-                <td>Uncertain</td>
-                <td>boolean</td>
-                <td><%= field_value_example('boolean') %></td>
-              </tr>
-              <tr>
-                <td>Escaped</td>
-                <td>boolean</td>
-                <td><%= field_value_example('boolean') %></td>
-              </tr>
-              <tr>
-                <td>Planted</td>
-                <td>boolean</td>
-                <td><%= field_value_example('boolean') %></td>
-              </tr>
-              <tr>
-                <td>Ecologically Significant</td>
-                <td>boolean</td>
-                <td><%= field_value_example('boolean') %></td>
-              </tr>
-              <tr>
-                <td>Observation Method</td>
-                <td>text</td>
-                <td><%= field_value_example('text') %></td>
-              </tr>
-              <tr>
-                <td>Host Name</td>
-                <td>text</td>
-                <td><%= field_value_example('text') %></td>
-              </tr>
-              <tr>
-                <td>Habitat</td>
-                <td>text</td>
-                <td><%= field_value_example('text') %></td>
-              </tr>
-              <tr>
-                <td>Substrate</td>
-                <td>text</td>
-                <td><%= field_value_example('text') %></td>
-              </tr>
-              <tr>
-                <td>Substrate Qualifier</td>
-                <td>text</td>
-                <td><%= field_value_example('text') %></td>
-              </tr>
-              <tr>
-                <td>Substrate Description</td>
-                <td>text</td>
-                <td><%= field_value_example('text') %></td>
-              </tr>
-            </table>
-
-            <% if @projects.count > 0 %>
-              <p class="ui">If a project has custom fields, add these to the end of each row, in the following order.</p>
-              <% @project_templates.each do |project, project_fields| %>
-                <% unless project_fields.empty? %>
-                <p class="ui">For <strong><%= project %></strong>:</p>
+        <div id="accordion">
+          <h3>Rules &amp; Formatting</h3>
+          <div>
+            <ol>
+              <li>A header row must be included.</li>
+              <li>Only files with 10,000 rows at a time, please.</li>
+              <li>Make sure it is a well formed CSV file - an export from any spreadsheet application (eg Microsoft Excel, LibreOffice Calc) should provide this.</li>
+              <li>The file must be comma-separated - a tab-separated file will not work.</li>
+              <li>Only one coordinate system can be used per file, otherwise incorrect conversion or display will occur.</li>
+              <li>
+                <p class="ui">We can only understand CSV in the following format:</p>
                 <table cellspacing="0" border="0" cellpadding="0">
                   <tr>
                     <th>Field Name</th>
                     <th>Field Type</th>
                     <th>Value Format</th>
                   </tr>
-                  <% project_fields.each do |field| %>
                   <tr>
-                    <td><%= field.name %></td>
-                    <td><%= field.datatype %></td>
-                    <td><%= field_value_example(field.datatype, field.allowed_values, field.id) %></td>
+                    <td>Taxon name</td>
+                    <td>text</td>
+                    <td><%= field_value_example('text') %></td>
                   </tr>
-                  <% end %>
+                  <tr>
+                    <td>Date observed</td>
+                    <td>date and time</td>
+                    <td><%= field_value_example('datetime') %></td>
+                  </tr>
+                  <tr>
+                    <td>Description</td>
+                    <td>text</td>
+                    <td><%= field_value_example('text') %></td>
+                  </tr>
+                  <tr>
+                    <td>Place name</td>
+                    <td>text</td>
+                    <td><%= field_value_example('text') %></td>
+                  </tr>
+                  <tr>
+                    <td>Latitude or Northing</td>
+                    <td>coordinate</td>
+                    <td><%= field_value_example('coordinate') %></td>
+                  </tr>
+                  <tr>
+                    <td>Longitude or Easting</td>
+                    <td>coordinate</td>
+                    <td><%= field_value_example('coordinate') %></td>
+                  </tr>
+                  <tr>
+                    <td>Tags</td>
+                    <td>text</td>
+                    <td><%= field_value_example('text') %></td>
+                  </tr>
+                  <tr>
+                    <td>Sex</td>
+                    <td>list</td>
+                    <td>One of the following:<br/><%= Observation::OBSERVATION_SEX.join(', ') %></td>
+                  </tr>
+                  <tr>
+                    <td>Stage</td>
+                    <td>list</td>
+                    <td>One of the following:<br/><%= Observation::STAGE_OPTIONS_VALUES.join(', ') %></td>
+                  </tr>
+                  <tr>
+                    <td>Cultivated</td>
+                    <td>list</td>
+                    <td>One of the following:<br/><%= Observation::CULTIVATED_OPTIONS.join(', ') %></td>
+                  </tr>
+                  <tr>
+                    <td>Number of individuals</td>
+                    <td>number</td>
+                    <td><%= field_value_example('number') %></td>
+                  </tr>
+                  <tr>
+                    <td>Sought but not found</td>
+                    <td>boolean</td>
+                    <td><%= field_value_example('boolean') %></td>
+                  </tr>
+                  <tr>
+                    <td>Geoprivacy</td>
+                    <td>list</td>
+                    <td>Leave blank for 'open' or one of <%= Observation::GEOPRIVACIES.join(', ') %></td>
+                  </tr>
+                  <tr>
+                    <td>Second Hand</td>
+                    <td>boolean</td>
+                    <td><%= field_value_example('boolean') %></td>
+                  </tr>
+                  <tr>
+                    <td>Uncertain</td>
+                    <td>boolean</td>
+                    <td><%= field_value_example('boolean') %></td>
+                  </tr>
+                  <tr>
+                    <td>Escaped</td>
+                    <td>boolean</td>
+                    <td><%= field_value_example('boolean') %></td>
+                  </tr>
+                  <tr>
+                    <td>Planted</td>
+                    <td>boolean</td>
+                    <td><%= field_value_example('boolean') %></td>
+                  </tr>
+                  <tr>
+                    <td>Ecologically Significant</td>
+                    <td>boolean</td>
+                    <td><%= field_value_example('boolean') %></td>
+                  </tr>
+                  <tr>
+                    <td>Observation Method</td>
+                    <td>text</td>
+                    <td><%= field_value_example('text') %></td>
+                  </tr>
+                  <tr>
+                    <td>Host Name</td>
+                    <td>text</td>
+                    <td><%= field_value_example('text') %></td>
+                  </tr>
+                  <tr>
+                    <td>Habitat</td>
+                    <td>text</td>
+                    <td><%= field_value_example('text') %></td>
+                  </tr>
+                  <tr>
+                    <td>Substrate</td>
+                    <td>text</td>
+                    <td><%= field_value_example('text') %></td>
+                  </tr>
+                  <tr>
+                    <td>Substrate Qualifier</td>
+                    <td>text</td>
+                    <td><%= field_value_example('text') %></td>
+                  </tr>
+                  <tr>
+                    <td>Substrate Description</td>
+                    <td>text</td>
+                    <td><%= field_value_example('text') %></td>
+                  </tr>
                 </table>
+
+                <% if @projects.count > 0 %>
+                  <p class="ui">If a project has custom fields, add these to the end of each row, in the following order.</p>
+                  <% @project_templates.each do |project, project_fields| %>
+                    <% unless project_fields.empty? %>
+                    <p class="ui">For <strong><%= project %></strong>:</p>
+                    <table cellspacing="0" border="0" cellpadding="0">
+                      <tr>
+                        <th>Field Name</th>
+                        <th>Field Type</th>
+                        <th>Value Format</th>
+                      </tr>
+                      <% project_fields.each do |field| %>
+                      <tr>
+                        <td><%= field.name %></td>
+                        <td><%= field.datatype %></td>
+                        <td><%= field_value_example(field.datatype, field.allowed_values, field.id) %></td>
+                      </tr>
+                      <% end %>
+                    </table>
+                    <% end %>
+                  <% end %>
                 <% end %>
-              <% end %>
-            <% end %>
-          </li>
-        </ol>
+              </li>
+            </ol>
+          </div>
+        </div>
       </div>
 
     </div>
