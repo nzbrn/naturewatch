@@ -876,7 +876,8 @@ class ObservationsController < ApplicationController
     if params[:upload][:project_id].blank?
       redirect_to import_observations_path
     else
-      redirect_to(import_observations_path(:project_id => params[:upload][:project_id]))
+      project = Project.find(params[:upload][:project_id].to_i)
+      redirect_to(project_path(project))
     end
   end
 
