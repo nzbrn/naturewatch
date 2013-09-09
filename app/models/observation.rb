@@ -1714,7 +1714,7 @@ class Observation < ActiveRecord::Base
   end
 
   def check_date_format
-    errors.add(:observed_on_string, 'must use the ISO8601 format') if ISO8601_REGEX.match(observed_on_string).nil?
+    errors.add(:observed_on_string, 'must use the ISO8601 format (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)') if ISO8601_REGEX.match(observed_on_string).nil?
   end
 
 end
