@@ -131,7 +131,7 @@ module ObservationsHelper
       when 'text'
         'alphanumeric string'
       when 'datetime', 'date'
-        'YYYY-MM-DD HH:MM'
+        'YYYY-MM-DD or YYYY-MM-DD HH:MM:SS'
       when 'latitude'
         'dd.dddd (latitude) or ddddddd (northing)'
       when 'longitude'
