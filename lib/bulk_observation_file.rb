@@ -93,21 +93,21 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
     # Iterate over each row
     rows.each do |row|
-      next if skip_row?(row)
+      unless skip_row?(row)
+        # Capture a second attempt encoding error
+        begin
+          row = check_encoding(row)
+        rescue Encoding::UndefinedConversionError => e
+          errors << e
+        end
 
-      # Capture a second attempt encoding error
-      begin
-        row = check_encoding(row)
-      rescue Encoding::UndefinedConversionError => e
-        errors << e
+        # Check that the number of CSV fields is correct.
+        errors << BulkObservationException.new("Column count is not correct (#{@custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count + 1) if row.count != (@custom_field_count + BASE_ROW_COUNT)
+
+        # Check the validity of the observation
+        obs = new_observation(row)
+        errors << BulkObservationException.new('Observation is not valid', row_count + 1, obs.errors) unless obs.valid?
       end
-
-      # Check that the number of CSV fields is correct.
-      errors << BulkObservationException.new("Column count is not correct (#{@custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count + 1) if row.count != (@custom_field_count + BASE_ROW_COUNT)
-
-      # Check the validity of the observation
-      obs = new_observation(row)
-      errors << BulkObservationException.new('Observation is not valid', row_count + 1, obs.errors) unless obs.valid?
 
       # Increment the row count.
       row_count = row_count + 1
