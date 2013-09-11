@@ -8,7 +8,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       @row_count = row_count unless row_count.nil?
 
       if errors.empty?
-        @errors = reason
+        @errors = [reason]
       else
         @errors = errors
       end
@@ -265,8 +265,9 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
         end
       else
         e.errors.each do |error|
-          errors[error] ||= []
-          errors[error] << e.row_count
+          errors['base'] ||= {}
+          errors['base'][error] ||= []
+          errors['base'][error] << e.row_count
         end
       end
     end
