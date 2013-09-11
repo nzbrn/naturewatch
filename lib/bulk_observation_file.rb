@@ -26,11 +26,6 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     @coord_system     = coord_system
     @user             = user
 
-    # CSV options
-    @csv_options = {
-      #:skip_lines => /\A\s*#/,
-    }
-
     # Try to load the specified project.
     if project_id.blank?
       @project = nil
@@ -84,7 +79,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     errors = []
 
     # Parse the entire observation file looking for possible errors.
-    rows = CSV.parse(open(@observation_file).read, @csv_options)
+    rows = CSV.parse(open(@observation_file).read)
 
     # Skip the header row - this is very clumsy, but using the built in
     # header skipping doesn't allow the use of Array.in_groups_of below
@@ -126,7 +121,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     row_count = 2
 
     # Load the entire file and skip the header row
-    csv = CSV.parse(open(@observation_file).read, @csv_options)
+    csv = CSV.parse(open(@observation_file).read)
     csv.shift
 
     # Split the rows into groups of the IMPORT_BATCH_FILE to
