@@ -162,18 +162,20 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
         end
       end
 
-      # Add all of the observations to the project.
-      observations.each do |obs|
-        @project.project_observations.create(:observation => obs)
+      # Add all of the observations to the project if a project was specified
+      if @project
+        observations.each do |obs|
+          @project.project_observations.create(:observation => obs)
+        end
+
+        # Manually update counter caches.
+        ProjectUser.update_observations_counter_cache_from_project_and_user(@project.id, @user.id)
+        ProjectUser.update_taxa_counter_cache_from_project_and_user(@project.id, @user.id)
+        Project.update_observed_taxa_count(@project.id)
+
+        # Do a mass refresh of the project taxa.
+        Project.refresh_project_list(@project.id, :taxa => observations.collect(&:taxon_id), :add_new_taxa => true)
       end
-
-      # Manually update counter caches.
-      ProjectUser.update_observations_counter_cache_from_project_and_user(@project.id, @user.id)
-      ProjectUser.update_taxa_counter_cache_from_project_and_user(@project.id, @user.id)
-      Project.update_observed_taxa_count(@project.id)
-
-      # Do a mass refresh of the project taxa.
-      Project.refresh_project_list(@project.id, :taxa => observations.collect(&:taxon_id), :add_new_taxa => true)
     end
   end
 
