@@ -244,7 +244,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
   end
 
   def skip_row?(row)
-    row.blank? || !(row =~ /\A\s*#/).nil?
+    row.blank? || !(row.first =~ /\A\s*#/).nil?
   end
 
   def collate_errors(exception)
