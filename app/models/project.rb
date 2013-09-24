@@ -298,7 +298,11 @@ class Project < ActiveRecord::Base
     ProjectObservationField.includes(:observation_field).where(:project_id => self.id).order(:position).each do |field|
       name = field.observation_field.name
       name = "#{name}*" if field.required?
-      data[name] = [field.observation_field.datatype]
+      if field.observation_field.allowed_values.blank?
+        data[name] = [field.observation_field.datatype]
+      else
+        data[name] = ["One of #{field.observation_field.allowed_values.split('|').join(', ')}"]
+      end
     end
 
     CSV.generate do |csv|
