@@ -125,6 +125,7 @@ Inaturalist::Application.routes.draw do
   match 'project/:id/terms' => 'projects#terms', :as => :project_terms
   match 'projects/user/:login' => 'projects#by_login', :as => :projects_by_login, :constraints => { :login => simplified_login_regex }
   match 'projects/:id/members' => 'projects#members', :as => :project_members
+  match 'projects/:id/bulk_template' => 'projects#bulk_template', :as => :project_bulk_template
   match 'projects/:id/contributors' => 'projects#contributors', :as => :project_contributors
   match 'projects/:id/contributors.:format' => 'projects#contributors', :as => :formatted_project_contributors
   match 'projects/:id/observed_taxa_count' => 'projects#observed_taxa_count', :as => :project_observed_taxa_count

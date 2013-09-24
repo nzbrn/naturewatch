@@ -266,4 +266,45 @@ class Project < ActiveRecord::Base
       po.destroy
     end
   end
+
+  def generate_bulk_upload_template
+    data = {
+      'Species'                  => ['#Lorem', '#Ipsum'],
+      'Observation Date'         => ['2013-01-01', '2013-01-01 12:00:00'],
+      'Description'              => ['Description of observation'],
+      'Location'                 => ['Wellington City', 'Karori'],
+      'Latitude or Northing'     => [-41.2837551, 1932810],
+      'Longitude or Easting'     => [174.7408745, 5669626],
+      'Tags'                     => ['Comma,Separated', 'List,Of,Tags'],
+      'Sex'                      => ["One of #{Observation::OBSERVATION_SEX.join(', ')}"],
+      'Stage'                    => ["One of #{Observation::STAGE_OPTIONS_VALUES.join(', ')}"],
+      'Cultivated'               => ["One of #{Observation::CULTIVATED_OPTIONS.join(', ')}"],
+      'Number of Individuals'    => [5, 1],
+      'Sought But Not Found'     => ['Yes', 'No'],
+      'Geoprivacy'               => ['', 'Private'],
+      'Second Hand'              => ['Second Hand'],
+      'Uncertain'                => ['Uncertain'],
+      'Escaped'                  => ['Escaped'],
+      'Planted'                  => ['Planted'],
+      'Ecologically Significant' => ['Ecologically Significant'],
+      'Observation Method'       => ['Observation Method'],
+      'Host Name'                => ['Host Name'],
+      'Habitat'                  => ['Habitat'],
+      'Substrate'                => ['Substrate'],
+      'Substrate Qualifier'      => ['Substrate Qualifier'],
+      'Substrate Description'    => ['Substrate Description'],
+    }
+
+    ProjectObservationField.includes(:observation_field).where(:project_id => self.id).order(:position).each do |field|
+      name = field.observation_field.name
+      name = "#{name}*" if field.required?
+      data[name] = [field.observation_field.datatype]
+    end
+
+    CSV.generate do |csv|
+      csv << data.keys
+      csv << data.collect { |f| f[1][0] }
+      csv << data.collect { |f| f[1][1] }
+    end
+  end
 end
