@@ -268,25 +268,27 @@ class Project < ActiveRecord::Base
   end
 
   def generate_bulk_upload_template
+    stage_values = split_large_array(Observation::STAGE_OPTIONS_VALUES)
+
     data = {
-      'Species'                  => ['#Lorem', '#Ipsum'],
-      'Observation Date'         => ['2013-01-01', '2013-01-01 12:00:00'],
+      'Species guess'            => ['#Lorem', 'Ipsum', 'Dolor'],
+      'Observation Date'         => ['2013-01-01', '2013-01-01 09:10:11', '2013-01-01T14:40:33'],
       'Description'              => ['Description of observation'],
       'Location'                 => ['Wellington City', 'Karori'],
       'Latitude or Northing'     => [-41.2837551, 1932810],
       'Longitude or Easting'     => [174.7408745, 5669626],
       'Tags'                     => ['Comma,Separated', 'List,Of,Tags'],
       'Sex'                      => ["One of #{Observation::OBSERVATION_SEX.join(', ')}"],
-      'Stage'                    => ["One of #{Observation::STAGE_OPTIONS_VALUES.join(', ')}"],
+      'Stage'                    => ["#{stage_values[0].join(', ')}", "#{stage_values[1].join(', ')}", "#{stage_values[2].join(', ')}"],
       'Cultivated'               => ["One of #{Observation::CULTIVATED_OPTIONS.join(', ')}"],
-      'Number of Individuals'    => [5, 1],
-      'Sought But Not Found'     => ['Yes', 'No'],
-      'Geoprivacy'               => ['', 'Private'],
-      'Second Hand'              => ['Second Hand'],
-      'Uncertain'                => ['Uncertain'],
-      'Escaped'                  => ['Escaped'],
-      'Planted'                  => ['Planted'],
-      'Ecologically Significant' => ['Ecologically Significant'],
+      'Number of Individuals'    => [5, 1, 100],
+      'Sought But Not Found'     => ['Yes or No'],
+      'Geoprivacy'               => ["[Leave blank for 'open']", 'Private', 'Obscured'],
+      'Second Hand'              => ['Yes or No'],
+      'Uncertain'                => ['Yes or No'],
+      'Escaped'                  => ['Yes or No'],
+      'Planted'                  => ['Yes or No'],
+      'Ecologically Significant' => ['Yes or No'],
       'Observation Method'       => ['Observation Method'],
       'Host Name'                => ['Host Name'],
       'Habitat'                  => ['Habitat'],
@@ -307,8 +309,15 @@ class Project < ActiveRecord::Base
 
     CSV.generate do |csv|
       csv << data.keys
+      csv << ['# A hash mark at the start of a row will mean the entire row is ignored']
       csv << data.collect { |f| f[1][0] }
       csv << data.collect { |f| f[1][1] }
+      csv << data.collect { |f| f[1][2] }
     end
+  end
+
+  def split_large_array(list)
+    list_count = (list.count / 3.0).ceil
+    list.in_groups_of(list_count)
   end
 end
