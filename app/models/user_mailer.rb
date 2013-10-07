@@ -32,6 +32,7 @@ class UserMailer < ActionMailer::Base
   def bulk_observation_success(user, observation_file)
     setup_email(user)
     @subject << "The bulk import of #{observation_file} has been completed successfully."
+    @filename = observation_file
     mail(:to => "#{user.name} <#{user.email}>", :subject => @subject, :from => @from)
   end
 
