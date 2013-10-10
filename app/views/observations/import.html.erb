@@ -211,6 +211,7 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
               <li>Only one coordinate system can be used per file, otherwise incorrect conversion or display will occur.</li>
               <li>
                 <p class="ui">We can only understand CSV in the following format:</p>
+                <p class="ui"><%= link_to("Download template", project_bulk_template_path(@project)) if @project %></p>
                 <table cellspacing="0" border="0" cellpadding="0">
                   <tr>
                     <th>Field Name</th>
