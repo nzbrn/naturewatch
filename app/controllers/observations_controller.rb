@@ -917,7 +917,7 @@ class ObservationsController < ApplicationController
   def import
     @project = Project.find(params[:project_id].to_i) if params[:project_id]
     if logged_in? && (current_user.has_role?(:admin) || current_user.has_role?(:pro) || (@project && @project.curated_by?(current_user)))
-      @projects = current_user.project_users.collect(&:project)
+      @projects = current_user.project_users.includes(:project).order('projects.title').collect(&:project)
       @project_templates = {}
       @projects.each do |p|
         @project_templates[p.title] = p.observation_fields.order(:position) if !@project || p.id == @project.id
