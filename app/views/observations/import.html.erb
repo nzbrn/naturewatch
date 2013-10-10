@@ -24,6 +24,13 @@
     $(document).ready(function() {
       $('#tabs').tabs();
       $('#accordion').accordion({ collapsible: true, header: 'h3', heightStyle: 'content' });
+
+      $('#upload_project_id').on('change', function(e) {
+        var project_id = e.currentTarget[e.currentTarget.selectedIndex].value;
+        if (project_id != '') {
+          window.location = "/observations/import?project_id=" + project_id;
+        }
+      });
       
       $('#photos').photoSelector({
         <%- if @default_photo_identity_url -%>
