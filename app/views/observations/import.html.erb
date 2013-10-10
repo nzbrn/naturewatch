@@ -211,7 +211,9 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
               <li>Only one coordinate system can be used per file, otherwise incorrect conversion or display will occur.</li>
               <li>
                 <p class="ui">We can only understand CSV in the following format:</p>
-                <p class="ui"><%= link_to("Download template", project_bulk_template_path(@project)) if @project %></p>
+                <% if @project %>
+                <p class="ui"><%= link_to("Download template", project_bulk_template_path(@project)) %> (<%= link_to("Help!", help_path()) %>)</p>
+                <% end %>
                 <table cellspacing="0" border="0" cellpadding="0">
                   <tr>
                     <th>Field Name</th>
@@ -340,7 +342,7 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
                   </tr>
                 </table>
 
-                <% if @projects.count > 0 %>
+                <% if @project %>
                   <p class="ui">If a project has custom fields, add these to the end of each row, in the following order.</p>
                   <% @project_templates.each do |project, project_fields| %>
                     <% unless project_fields.empty? %>

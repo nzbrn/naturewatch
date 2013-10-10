@@ -920,7 +920,7 @@ class ObservationsController < ApplicationController
       @projects = current_user.project_users.includes(:project).order('projects.title').collect(&:project)
       @project_templates = {}
       @projects.each do |p|
-        @project_templates[p.title] = p.observation_fields.order(:position) if !@project || p.id == @project.id
+        @project_templates[p.title] = p.observation_fields.order(:position) if @project && p.id == @project.id
       end
     end
   end
