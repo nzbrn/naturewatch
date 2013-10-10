@@ -30,6 +30,9 @@
         if (project_id != '') {
           window.location = "/observations/import?project_id=" + project_id;
         }
+        else {
+          window.location = "/observations/import";
+        }
       });
       
       $('#photos').photoSelector({
