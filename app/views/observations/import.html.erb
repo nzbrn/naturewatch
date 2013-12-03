@@ -191,7 +191,10 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
             </div>
             <div class="last column span-12">
               <%= select 'upload', :coordinate_system, { 'WGS84' => 'wgs84' }.update(coordinate_system_select_options) %>
-              <span class="coords_tip_target helptip" rel="#coords_tip"></span><div id="coords_tip" style="display:none">Content for coordinate system tip</div>
+              <span class="coords_tip_target helptip" rel="#coords_tip"></span><div id="coords_tip" style="display:none">
+                <p>A variety of different coordinate systems are used in NZ. The most common NZ-specific systems are NZMG and NZTM2000. NZMG, the New Zealand Map Grid, is the system used by the the old NZMS260 topomap series. NZTM2000, the NZ Transverse Mercator 2000, is the new and improved version of this that is used by current topomaps. If your coordinates are from a GPS unit, check its settings for the name of the coordinate system it is using.</p>
+                <p>When you provide coordinates representing a location, we need to know which coordinate system is used, to be able to interpret them correctly. Please be certain you have chosen the correct coordinate system for your data or the location may finish up a long way from where it should be.</p>
+              </div>
             </div>
           </div>
           <div class="column span-16">
