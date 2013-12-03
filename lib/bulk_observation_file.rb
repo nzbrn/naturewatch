@@ -99,6 +99,10 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
         # Check that the number of CSV fields is correct.
         errors << BulkObservationException.new("Column count is not correct (#{@custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count + 1) if row.count != (@custom_field_count + BASE_ROW_COUNT)
 
+        # Look for the species and flag it if it's not found.
+        taxon = Taxon.single_taxon_for_name(row[0])
+        errors << BulkObservationException.new('Species guess not found', row_count + 1) if taxon.nil?
+
         # Check the validity of the observation
         obs = new_observation(row)
         errors << BulkObservationException.new('Observation is not valid', row_count + 1, obs.errors) unless obs.valid?
