@@ -55,7 +55,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       error_details = collate_errors(e)
 
       # Email the uploader with exception details
-      UserMailer.bulk_observation_error(@user, File.basename(@observation_file), error_details).deliver
+      UserMailer.bulk_observation_error(@user, File.basename(@observation_file), error_details)
     end
   end
 
