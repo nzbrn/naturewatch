@@ -55,7 +55,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       error_details = collate_errors(e)
 
       # Email the uploader with exception details
-      UserMailer.delay.bulk_observation_error(@user, File.basename(@observation_file), error_details)
+      UserMailer.bulk_observation_error(@user, File.basename(@observation_file), error_details).deliver
     end
   end
 
@@ -101,7 +101,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
         # Look for the species and flag it if it's not found.
         taxon = Taxon.single_taxon_for_name(row[0])
-        errors << BulkObservationException.new('Species guess not found', row_count + 1) if taxon.nil?
+        errors << BulkObservationException.new('The species listed below were not found in the Naturewatch database. Please check the spelling for each entry. If the spelling is correct, please ask Naturewatch to add the species from an external source e.g. NZOR.', row_count + 1) if taxon.nil?
 
         # Check the validity of the observation
         obs = new_observation(row)
@@ -137,11 +137,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
           row = check_encoding(row)
 
           # Add the observation file name as a tag for identification purposes.
-          if row[6].blank?
-            tags = []
-          else
-            tags = row[6].split(',')
-          end
+          tags = row[6].blank? ? [] : row[6].split(',')
           tags << File.basename(@observation_file)
           row[6] = tags.join(',')
 
