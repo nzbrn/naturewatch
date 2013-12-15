@@ -1,11 +1,12 @@
 # Custom DelayedJob task for the bulk upload functionality.
 class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_system, :user)
   class BulkObservationException < StandardError
-    attr_reader :reason, :row_count, :errors
+    attr_reader :reason, :row_count, :errors, :tag
 
-    def initialize(reason, row_count = nil, errors = [])
+    def initialize(reason, row_count = nil, errors = [], tag = nil)
       @reason    = reason
       @row_count = row_count unless row_count.nil?
+      @tag       = tag unless tag.nil?
 
       if errors.empty?
         @errors = [reason]
@@ -101,7 +102,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
 
         # Look for the species and flag it if it's not found.
         taxon = Taxon.single_taxon_for_name(row[0])
-        errors << BulkObservationException.new('The species listed below were not found in the Naturewatch database. Please check the spelling for each entry. If the spelling is correct, please ask Naturewatch to add the species from an external source e.g. NZOR.', row_count + 1) if taxon.nil?
+        errors << BulkObservationException.new("Species not found: #{row[0]}", row_count + 1, [], 'species_not_found') if taxon.nil?
 
         # Check the validity of the observation
         obs = new_observation(row)
@@ -260,6 +261,12 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
           errors[field][full_error] << e.row_count
           field_options[field] = Observation.field_allowed_values(field)
         end
+      elsif !e.tag.nil?
+        e.errors.each do |error|
+          errors[e.tag] ||= {}
+          errors[e.tag][error] ||= []
+          errors[e.tag][error] << e.row_count
+        end
       else
         e.errors.each do |error|
           errors['base'] ||= {}
@@ -269,7 +276,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       end
     end
 
-    { :reason => exception.reason, :errors => errors, :field_options => field_options }
+    { :reason => exception.reason, :errors => errors.stringify_keys.sort_by { |k, v| k }, :field_options => field_options }
   end
 
 end

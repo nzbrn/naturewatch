@@ -2,6 +2,7 @@
 
 <% unless @errors.nil? %>
   <% @errors.each do |field, errors| %>
+    <%= show_field_prefix(field) %>
   <ul>
     <% errors.each do |error, rows|  %>
     <li>
