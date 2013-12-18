@@ -141,6 +141,7 @@ module ObservationsHelper
       when 'list'
         'limited set of options, usually alphanumeric'
       when 'number'
+      when 'numeric'
         'positive whole number'
       else
         nil
