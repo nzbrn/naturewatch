@@ -116,7 +116,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       break if errors.count >= MAX_ERROR_COUNT
     end
 
-    raise BulkObservationException.new("There were too many errors encountered in #{File.basename(@observation_file)}:", nil, errors) if errors.count > 0
+    raise BulkObservationException.new("We tried to upload your spreadsheet called #{File.basename(@observation_file)} to #{CONFIG.site_name} but it didn't work. Please fix the following problem(s) and try again.", nil, errors) if errors.count > 0
     raise BulkObservationException.new("The observation file '#{File.basename(@observation_file)}' was empty.") if row_count == 0
   end
 
