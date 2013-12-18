@@ -66,10 +66,10 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
         nil
       else
         begin
-          item.to_s.encode('UTF-8').strip
+          item.to_s.encode('UTF-8', 'binary', :invalid => :replace, :unded => :replace, :replace => '').strip
         rescue Encoding::UndefinedConversionError => e
           problem = e.message[/"(.+)" from/, 1]
-          item.to_s.gsub(problem, '').encode('UTF-8').strip
+          item.to_s.gsub(problem, '').encode('UTF-8', 'binary', :invalid => :replace, :unded => :replace, :replace => '').strip
         end
       end
     end
