@@ -21,17 +21,26 @@
   <%= javascript_include_tag "jquery/plugins/inat/photo_selectors.js" %>
   <%= javascript_tag "var AUTH_TOKEN = #{form_authenticity_token.inspect.html_safe};" if protect_against_forgery? %>
   <script type="text/javascript" charset="utf-8">
+    function getURLParameter(name) {
+      return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+    }
+
     $(document).ready(function() {
-      $('#tabs').tabs();
+      var tab_options = {};
+      var select_tab = getURLParameter('tab');
+      if (select_tab) {
+        tab_options.active = select_tab;
+      }
+      $('#tabs').tabs(tab_options);
       $('#accordion').accordion({ collapsible: true, header: 'h3', heightStyle: 'content' });
 
       $('#upload_project_id').on('change', function(e) {
         var project_id = e.currentTarget[e.currentTarget.selectedIndex].value;
         if (project_id != '') {
-          window.location = "/observations/import?project_id=" + project_id;
+          window.location = "/observations/import?project_id=" + project_id + "&tab=2";
         }
         else {
-          window.location = "/observations/import";
+          window.location = "/observations/import?tab=2";
         }
       });
       
