@@ -156,9 +156,13 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
 
     <div id="bulk_import">
       <div class="readable description">
-        Upload a larger CSV file with observation data. This is similar to the CSV upload option,
+        <p>Upload a larger CSV file with observation data. This is similar to the CSV upload option,
         except that this allows a larger data set (10,000 rows) to be imported. This is also done
-        as a background process, and you will be sent an email on completion.
+        as a background process, and you will be sent an email on completion.</p>
+        <% if @project %>
+        <p>There is a template file for this project that may help you with the structure of the CSV file - <%= link_to("Download template", project_bulk_template_path(@project)) %></p>
+        <% end %>
+        <p>For more detailed help on this process, <%= link_to("click here", '/pages/bulk_import') %></p>
       </div>
 
       <div class="column" style="float:none">
@@ -166,13 +170,6 @@ Golden Eagle,,"I'm not really sure when or where this was",,,,"mysterious"</code
                      :id => 'new_bulk_form',
                      :class => 'clear observationform',
                      :multipart => true) do %>
-          <% if @project %>
-          <div class="column field span-16">
-            <div class="buttonrow">
-              <%= link_to("Download template", project_bulk_template_path(@project), :class => 'default button') %>
-            </div>
-          </div>
-          <% end %>
           <div class="column field span-16">
             <div class="column span-4">
               <h3><label for="upload_file">Upload CSV file</label></h3>
