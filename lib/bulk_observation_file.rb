@@ -162,6 +162,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       if @project
         observations.each do |obs|
           @project.project_observations.create(:observation => obs)
+          Identification.create(:user => obs.user, :taxon => obs.taxon, :observation => obs, :skip_observation => true)
         end
 
         # Manually update counter caches.
