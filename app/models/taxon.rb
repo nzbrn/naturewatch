@@ -1188,9 +1188,9 @@ class Taxon < ActiveRecord::Base
     elsif taxon_names.map(&:name).uniq.size == 1 && taxa.map(&:parent_id).uniq.size == 1
       sorted.detect{|taxon| taxon.is_active?}
 
-    # else assume there are >1 legit synonyms and refuse to make a decision
+    # else assume there are >1 legit synonyms and take the first one
     else
-      nil
+      sorted.first
     end
   end
   
