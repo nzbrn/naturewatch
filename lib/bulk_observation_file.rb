@@ -204,21 +204,6 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       obs.coordinate_system = @coord_system
     end
 
-    # Add in the professional field set details
-    obs.pro_fieldset = ProFieldset.new(
-      :second_hand              => row[13],
-      :uncertain                => row[14],
-      :escaped                  => row[15],
-      :planted                  => row[16],
-      :ecologically_significant => row[17],
-      :observation_method       => row[18],
-      :host_name                => row[19],
-      :habitat                  => row[20],
-      :substrate                => row[21],
-      :substrate_qualifier      => row[22],
-      :substrate_description    => row[23],
-    )
-
     # Are we adding to a specific project?
     unless @project.nil?
       # Add the per-project fields if applicable.
