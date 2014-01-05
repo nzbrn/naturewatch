@@ -60,27 +60,12 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     end
   end
 
-  def check_encoding(row)
-    row = row.map do |item|
-      if item.blank?
-        nil
-      else
-        begin
-          item.to_s.encode('UTF-8', 'binary', :invalid => :replace, :unded => :replace, :replace => '').strip
-        rescue Encoding::UndefinedConversionError => e
-          problem = e.message[/"(.+)" from/, 1]
-          item.to_s.gsub(problem, '').encode('UTF-8', 'binary', :invalid => :replace, :unded => :replace, :replace => '').strip
-        end
-      end
-    end
-  end
-
   def validate_file
     row_count = 1
     errors = []
 
     # Parse the entire observation file looking for possible errors.
-    rows = CSV.parse(open(@observation_file).read)
+    rows = CSV.parse(open(@observation_file).read.encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => ''))
 
     # Skip the header row - this is very clumsy, but using the built in
     # header skipping doesn't allow the use of Array.in_groups_of below
@@ -90,13 +75,6 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     # Iterate over each row
     rows.each do |row|
       unless skip_row?(row)
-        # Capture a second attempt encoding error
-        begin
-          row = check_encoding(row)
-        rescue Encoding::UndefinedConversionError => e
-          errors << e
-        end
-
         # Check that the number of CSV fields is correct.
         errors << BulkObservationException.new("Column count is not correct (#{@custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count + 1) if row.count != (@custom_field_count + BASE_ROW_COUNT)
 
@@ -126,7 +104,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     row_count = 2
 
     # Load the entire file and skip the header row
-    csv = CSV.parse(open(@observation_file).read)
+    csv = CSV.parse(open(@observation_file).read.encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => ''))
     csv.shift
 
     # Split the rows into groups of the IMPORT_BATCH_FILE to
@@ -135,7 +113,6 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
       ActiveRecord::Base.transaction do
         rows.each do |row|
           next if skip_row?(row)
-          row = check_encoding(row)
 
           # Add the observation file name as a tag for identification purposes.
           tags = row[6].blank? ? [] : row[6].split(',')
