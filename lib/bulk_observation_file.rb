@@ -65,7 +65,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     errors = []
 
     # Parse the entire observation file looking for possible errors.
-    rows = CSV.parse(open(@observation_file).read.encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => ''))
+    rows = CSV.parse(open(@observation_file, 'r:iso-8859-1:utf-8').read)
 
     # Skip the header row - this is very clumsy, but using the built in
     # header skipping doesn't allow the use of Array.in_groups_of below
@@ -104,7 +104,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     row_count = 2
 
     # Load the entire file and skip the header row
-    csv = CSV.parse(open(@observation_file).read.encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => ''))
+    csv = CSV.parse(open(@observation_file, 'r:iso-8859-1:utf-8').read)
     csv.shift
 
     # Split the rows into groups of the IMPORT_BATCH_FILE to
