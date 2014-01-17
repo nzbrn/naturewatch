@@ -373,12 +373,8 @@ class ObservationsController < ApplicationController
       @observation.species_guess =  params[:taxon_name]
     end
     
-    @observation_fields = ObservationField.
-      includes(:observation_field_values => {:observation => :user}).
-      where("users.id = ?", current_user).
-      limit(10).
-      order("observation_field_values.id DESC")
-    
+    @observation_fields = ObservationField.recently_used_by(current_user).limit(10)
+
     respond_to do |format|
       format.html do
         @observations = [@observation]
@@ -440,11 +436,7 @@ class ObservationsController < ApplicationController
     sync_flickr_photo if params[:flickr_photo_id]
     sync_picasa_photo if params[:picasa_photo_id]
     sync_local_photo if params[:local_photo_id]
-    @observation_fields = ObservationField.
-      includes(:observation_field_values => {:observation => :user}).
-      where("users.id = ?", current_user).
-      limit(10).
-      order("observation_field_values.id DESC")
+    @observation_fields = ObservationField.recently_used_by(current_user).limit(10)
 
     if params[:partial] && EDIT_PARTIALS.include?(params[:partial])
       return render(:partial => params[:partial], :object => @observation,
@@ -866,6 +858,29 @@ class ObservationsController < ApplicationController
     end
   end
 
+  def new_bulk_csv
+    if params[:upload].blank? || params[:upload] && params[:upload][:datafile].blank?
+      flash[:error] = "You must select a CSV file to upload."
+      return redirect_to :action => "import"
+    end
+
+    # Copy to a temp directory.
+    path = "#{Rails.root}/tmp/#{params[:upload]['datafile'].original_filename}"
+    File.open(path, 'wb') { |f| f.write(params[:upload]['datafile'].read) }
+
+    # Send the filename to a background processor
+    Delayed::Job.enqueue(BulkObservationFile.new(path, params[:upload][:project_id], params[:upload][:coordinate_system], current_user))
+
+    # Notify the user that it's getting processed and return them to the upload screen.
+    flash[:notice] = 'Observation file has been queued for import.'
+    if params[:upload][:project_id].blank?
+      redirect_to import_observations_path
+    else
+      project = Project.find(params[:upload][:project_id].to_i)
+      redirect_to(project_path(project))
+    end
+  end
+
   # Edit a batch of observations
   def edit_batch
     observation_ids = params[:o].is_a?(String) ? params[:o].split(',') : []
@@ -900,6 +915,14 @@ class ObservationsController < ApplicationController
   
   # Import observations from external sources
   def import
+    @project = Project.find(params[:project_id].to_i) if params[:project_id]
+    if logged_in?
+      @projects = current_user.project_users.includes(:project).order('projects.title').collect(&:project)
+      @project_templates = {}
+      @projects.each do |p|
+        @project_templates[p.title] = p.observation_fields.order(:position) if @project && p.id == @project.id
+      end
+    end
   end
   
   def import_photos
@@ -1297,11 +1320,7 @@ class ObservationsController < ApplicationController
     elsif params[:observation_fields]
       ObservationField.where("id IN (?)", params[:observation_fields])
     else
-      @observation_fields = ObservationField.
-        includes(:observation_field_values => {:observation => :user}).
-        where("users.id = ?", current_user).
-        limit(10).
-        order("observation_field_values.id DESC")
+      @observation_fields = ObservationField.recently_used_by(current_user).limit(10)
     end
     render :layout => false
   end

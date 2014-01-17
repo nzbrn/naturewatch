@@ -9,3 +9,8 @@ en:
     failure:
       user:
         suspended: "Your account has been suspended"
+  activerecord:
+    attributes:
+      observation:
+        geo_x: Easting
+        geo_y: Northing

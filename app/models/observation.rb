@@ -4,10 +4,11 @@ class Observation < ActiveRecord::Base
     :comments => {:notification => "activity", :include_owner => true},
     :identifications => {:notification => "activity", :include_owner => true}
   }
-  notifies_subscribers_of :user, :notification => "created_observations"
+  notifies_subscribers_of :user, :notification => "created_observations",
+    :queue_if => lambda { |observation| !observation.bulk_import }
   notifies_subscribers_of :public_places, :notification => "new_observations", 
     :queue_if => lambda {|observation|
-      observation.georeferenced? && !observation.taxon_id.blank?
+      observation.georeferenced? && !observation.taxon_id.blank? && !observation.bulk_import
     },
     :if => lambda {|observation, place, subscription|
       return false unless observation.georeferenced?
@@ -16,7 +17,7 @@ class Observation < ActiveRecord::Base
       observation.taxon.ancestor_ids.include?(subscription.taxon_id)
     }
   notifies_subscribers_of :taxon_and_ancestors, :notification => "new_observations", 
-    :queue_if => lambda {|observation| !observation.taxon_id.blank? },
+    :queue_if => lambda {|observation| !observation.taxon_id.blank? && !observation.bulk_import},
     :if => lambda {|observation, taxon, subscription|
       return true if observation.taxon_id == taxon.id
       return false if observation.taxon.blank?
@@ -30,7 +31,7 @@ class Observation < ActiveRecord::Base
   # Set to true if you want to skip the expensive updating of all the user's
   # lists after saving.  Useful if you're saving many observations at once and
   # you want to update lists in a batch
-  attr_accessor :skip_refresh_lists, :skip_refresh_check_lists, :skip_identifications
+  attr_accessor :skip_refresh_lists, :skip_refresh_check_lists, :skip_identifications, :bulk_import
   
   # Set if you need to set the taxon from a name separate from the species 
   # guess
@@ -39,6 +40,16 @@ class Observation < ActiveRecord::Base
   # licensing extras
   attr_accessor :make_license_default
   attr_accessor :make_licenses_same
+  
+  # coordinate system
+  attr_accessor :coordinate_system
+  attr_accessor :place_guess_other
+  attr_accessor :positional_accuracy_other
+  attr_accessor :geo_x
+  attr_accessor :geo_y
+
+  # custom project field errors
+  attr_accessor :custom_field_errors
 
   serialize :legacy
   
@@ -52,6 +63,7 @@ class Observation < ActiveRecord::Base
   COORDINATE_REGEX = /[^\d\,]*?(#{FLOAT_REGEX})[^\d\,]*?/
   LAT_LON_SEPARATOR_REGEX = /[\,\s]\s*/
   LAT_LON_REGEX = /#{COORDINATE_REGEX}#{LAT_LON_SEPARATOR_REGEX}#{COORDINATE_REGEX}/
+  ISO8601_REGEX = /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|0[1-9]|[1-2][0-9])([T ](2[0-3]|[0-1][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[0-1][0-9]):[0-5][0-9])?)?$/
   OBSERVATION_SEX = ["Male", "Female" ,"In Pair", "Mixed"]
   CULTIVATED_OPTIONS = %w[Yes No Maybe]
   NZBRN_ICONIC = {
@@ -75,7 +87,8 @@ class Observation < ActiveRecord::Base
    'Birds' => [['Egg','birds_egg'],['Chick','birds_chick'], ['Juvenile','birds_juvenile'],['Adult','birds_adult']],
    'Mammals' => [['Juvenile','mammals_juvenile'],['Adult','mammals_adult']],
    'All' => [['Egg','all_egg'],['Juvenile','all_juvenile'], ['Adult','all_adult']]
-  } 
+  }
+  STAGE_OPTIONS_VALUES = STAGE_OPTIONS.collect { |k,v| v}.flatten.grep(/_/)
 
   PRIVATE = "private"
   OBSCURED = "obscured"
@@ -144,6 +157,7 @@ class Observation < ActiveRecord::Base
     "tag_list",
     "description",
   ]
+  WGS84_PROJ4 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
   
   belongs_to :user, :counter_cache => true
   belongs_to :taxon, :counter_cache => true
@@ -245,8 +259,12 @@ class Observation < ActiveRecord::Base
   
   validate :must_be_in_the_past,
            :must_not_be_a_range,
-           :stage_must_be_valid_for_taxon
+           :stage_must_be_valid_for_taxon,
+           :check_custom_field_errors
   
+  # Only check that the date format is correct during the bulk import
+  validate :check_date_format, :if => proc { |o| o.bulk_import == true }
+
   validates_numericality_of :latitude,
     :allow_blank => true, 
     :less_than_or_equal_to => 90, 
@@ -259,15 +277,33 @@ class Observation < ActiveRecord::Base
     :allow_blank => true, 
     :greater_than_or_equal_to => 1, 
     :only_integer => true,
-    :message => "can only be whole number greater than zero."
+    :message => "can only be a whole number greater than zero."
   validates_inclusion_of :sex,
     :in => OBSERVATION_SEX,
-    :message => "%{value} is not a valid sex",
+    :message => "'%{value}' is not a valid sex",
     :allow_blank => true
   validates_inclusion_of :cultivated,
     :in => CULTIVATED_OPTIONS,
-    :message => "%{value} is not a valid cultivated option",
+    :message => "'%{value}' is not a valid cultivated option",
     :allow_blank => true
+  validates_inclusion_of :stage,
+    :in => STAGE_OPTIONS_VALUES,
+    :message => "'%{value}' is not a valid stage option",
+    :allow_blank => true
+
+  validates_inclusion_of :coordinate_system,
+    :in => proc { CONFIG.coordinate_systems.keys },
+    :message => "'%{value}' is not a valid coordinate system",
+    :allow_blank => true
+  # See /config/locale/en.yml for field labels for `geo_x` and `geo_y`
+  validates_numericality_of :geo_x,
+    :allow_blank => true,
+    :message => "should be a number"
+  validates_numericality_of :geo_y,
+    :allow_blank => true,
+    :message => "should be a number"
+  validates_presence_of :geo_x, :if => proc {|o| o.geo_y.present? }
+  validates_presence_of :geo_y, :if => proc {|o| o.geo_x.present? }
   
   before_validation :munge_observed_on_with_chronic,
                     :set_time_zone,
@@ -289,7 +325,7 @@ class Observation < ActiveRecord::Base
               :update_identifications,
               :save_users_expertise
 
-  
+  before_create :set_coordinates
   before_update :set_quality_grade
                  
   after_save :refresh_lists,
@@ -1568,6 +1604,39 @@ class Observation < ActiveRecord::Base
     end
   end
   
+  def set_coordinates
+    if self.geo_x.present? && self.geo_y.present? && self.coordinate_system.present?
+      # Set the place_guess if place_guess_other is present
+      self.place_guess = self.place_guess_other if self.place_guess_other.present?
+
+      # Set the positional_accuracy if positional_accuracy_other is present
+      self.positional_accuracy = self.positional_accuracy_other if self.positional_accuracy_other.present?
+
+      # Perform the transformation
+      # transfrom from `self.coordinate_system`
+      from = RGeo::CoordSys::Proj4.new(CONFIG.coordinate_systems.send(self.coordinate_system.to_sym).proj4)
+
+      # ... to WGS84
+      to = RGeo::CoordSys::Proj4.new(WGS84_PROJ4)
+
+      # Returns an array of lat, lon
+      transform = RGeo::CoordSys::Proj4.transform_coords(from, to, self.geo_x.to_d, self.geo_y.to_d)
+
+      # Set the transfor
+      self.longitude, self.latitude = transform
+
+
+      # Store `geo_x`, `geo_y`, `coordinate_system`, `longitude` and `latitude` in the legacy colum
+      self.legacy = (self.legacy || {}).merge({
+        :geo_x => self.geo_x.to_d,
+        :geo_y => self.geo_y.to_d,
+        :coordinate_system => self.coordinate_system,
+        :longitude =>  self.longitude,
+        :latitude => self.latitude
+      })
+    end
+  end
+  
   # Required for use of the sanitize method in
   # ObservationsHelper#short_observation_description
   def self.white_list_sanitizer
@@ -1622,5 +1691,30 @@ class Observation < ActiveRecord::Base
   def self.generate_csv_for_cache_key(record, options = {})
     "#{record.class.name.underscore}_#{record.id}"
   end
-  
+
+  def check_custom_field_errors
+    unless custom_field_errors.nil?
+      custom_field_errors.each { |e| errors.add(:base, e) }
+    end
+  end
+
+  def self.field_allowed_values(field)
+    case field
+    when :sex
+      Observation::OBSERVATION_SEX
+    when :stage
+      Observation::STAGE_OPTIONS_VALUES
+    when :cultivated
+      Observation::CULTIVATED_OPTIONS
+    when :geoprivacy
+      Observation::GEOPRIVACIES + ["leave blank for 'open'"]
+    else
+      []
+    end.to_sentence(:two_words_connector => ' or ', :last_word_connector => ' or ')
+  end
+
+  def check_date_format
+    errors.add(:base, 'Date must use the ISO8601 format (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)') if !observed_on_string.blank? && ISO8601_REGEX.match(observed_on_string).nil?
+  end
+
 end

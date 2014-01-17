@@ -18,6 +18,20 @@ class ObservationField < ActiveRecord::Base
   before_validation :strip_allowed_values
   validate :allowed_values_has_pipes
   
+  scope :recently_used_by, lambda {|user|
+    user_id = user.is_a?(User) ? user.id : user.to_i
+    subsql = <<-SQL
+      SELECT observation_field_id, max(observation_field_values.id) AS ofv_max_id
+      FROM observation_field_values
+        INNER JOIN observations ON observations.id = observation_field_values.observation_ID
+      WHERE observations.user_id = #{user_id}
+      GROUP BY observation_field_id
+    SQL
+    select("observation_fields.*, ofvs.ofv_max_id").
+    joins("INNER JOIN (#{subsql}) ofvs ON ofvs.observation_field_id = observation_fields.id").
+    order("ofvs.ofv_max_id DESC")
+  }
+
   # TYPES = %w(text numeric date time datetime location)
   TYPES = %w(text numeric date time taxon)
   

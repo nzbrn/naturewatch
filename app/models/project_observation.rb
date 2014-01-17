@@ -34,25 +34,28 @@ class ProjectObservation < ActiveRecord::Base
   end
   
   def refresh_project_list
-    return true if observation.blank? || observation.taxon_id.blank?
-    Project.delay(:priority => USER_INTEGRITY_PRIORITY).refresh_project_list(project_id, 
+    return true if observation.blank? || observation.taxon_id.blank? || observation.bulk_import
+    Project.delay(:priority => USER_INTEGRITY_PRIORITY).refresh_project_list(project_id,
       :taxa => [observation.taxon_id], :add_new_taxa => id_was.nil?)
     true
   end
   
   def update_observations_counter_cache_later
     return true unless observation
+    return true if observation.bulk_import
     ProjectUser.delay(:priority => USER_INTEGRITY_PRIORITY).update_observations_counter_cache_from_project_and_user(project_id, observation.user_id)
     true
   end
   
   def update_taxa_counter_cache_later
     return true unless observation
+    return true if observation.bulk_import
     ProjectUser.delay(:priority => USER_INTEGRITY_PRIORITY).update_taxa_counter_cache_from_project_and_user(project_id, observation.user_id)
     true
   end
   
   def update_project_observed_taxa_counter_cache_later
+    return true if observation.bulk_import
     Project.delay(:priority => USER_INTEGRITY_PRIORITY).update_observed_taxa_count(project_id)
   end
 
