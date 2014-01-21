@@ -17,16 +17,16 @@
   <% end %>
   <%= t.body do |row| %>
     <%= t.r do %>
-      <%= t.d row['id'] %>
-      <%= t.d row['priority'] %>
-      <%= t.d row['attempts'] %>
-      <%= t.d YAML.load(row['handler']) %>
-      <%= t.d row['last_error'].match(/.*\n/).to_s %>
-      <%= t.d row['queue'] %>
-      <%= t.d row['run_at'] %>
-      <%= t.d row['failed_at'] %>
-      <%= t.d row['locked_at'] %>
-      <%= t.d row['locked_by'] %>
+      <%= t.d(row['id']) %>
+      <%= t.d(row['priority']) %>
+      <%= t.d(row['attempts']) %>
+      <%= t.d(YAML.load(row['handler'])) %>
+      <%= t.d(row['last_error'].match(/.*\n/).to_s) unless row['last_error'].nil? %>
+      <%= t.d(row['queue']) %>
+      <%= t.d(row['run_at']) %>
+      <%= t.d(row['failed_at']) %>
+      <%= t.d(row['locked_at']) %>
+      <%= t.d(row['locked_by']) %>
     <% end %>
   <% end %>
 <% end %>
