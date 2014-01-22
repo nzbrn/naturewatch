@@ -284,17 +284,6 @@ class Project < ActiveRecord::Base
       'Number of Individuals'    => [5, 1, 100],
       'Sought But Not Found'     => ['Yes or No'],
       'Geoprivacy'               => ["[Leave blank for 'open']", 'Private', 'Obscured'],
-      'Second Hand'              => ['Yes or No'],
-      'Uncertain'                => ['Yes or No'],
-      'Escaped'                  => ['Yes or No'],
-      'Planted'                  => ['Yes or No'],
-      'Ecologically Significant' => ['Yes or No'],
-      'Observation Method'       => ['Observation Method'],
-      'Host Name'                => ['Host Name'],
-      'Habitat'                  => ['Habitat'],
-      'Substrate'                => ['Substrate'],
-      'Substrate Qualifier'      => ['Substrate Qualifier'],
-      'Substrate Description'    => ['Substrate Description'],
     }
 
     ProjectObservationField.includes(:observation_field).where(:project_id => self.id).order(:position).each do |field|
