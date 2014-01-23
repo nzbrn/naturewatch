@@ -299,7 +299,7 @@ class Project < ActiveRecord::Base
     CSV.generate do |csv|
       csv << data.keys
       csv << ['# A hash mark at the start of a row will mean the entire row is ignored']
-      csv << ["# For help using this template, see #{CONFIG.site_url}/pages/bulk_import"]
+      csv << ["# For help using this template see #{CONFIG.site_url}/pages/bulk_import"]
       csv << data.collect { |f| f[1][0] }
       csv << data.collect { |f| f[1][1] }
       csv << data.collect { |f| f[1][2] }
