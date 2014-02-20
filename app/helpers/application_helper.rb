@@ -795,4 +795,12 @@ module ApplicationHelper
     end
   end
   
+  def delayed_job_handler(handler)
+    h = YAML.load(handler)
+    if h.is_a?(BulkObservationFile)
+      File.basename(h.observation_file)
+    else
+      h
+    end
+  end
 end

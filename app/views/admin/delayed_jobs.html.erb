@@ -6,7 +6,7 @@
       <%= t.h('id') %>
       <%= t.h('priority') %>
       <%= t.h('attempts') %>
-      <%= t.h('handler') %>
+      <%= t.h('observation file') %>
       <%= t.h('last error') %>
       <%= t.h('queue') %>
       <%= t.h('run at') %>
@@ -20,7 +20,7 @@
       <%= t.d(row['id']) %>
       <%= t.d(row['priority']) %>
       <%= t.d(row['attempts']) %>
-      <%= t.d(YAML.load(row['handler'])) %>
+      <%= t.d(delayed_job_handler(row['handler'])) %>
       <%= t.d(row['last_error'].match(/.*\n/).to_s) unless row['last_error'].nil? %>
       <%= t.d(row['queue']) %>
       <%= t.d(row['run_at']) %>
