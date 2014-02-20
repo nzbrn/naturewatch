@@ -16,7 +16,7 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     end
   end
 
-  BASE_ROW_COUNT    = 24
+  BASE_ROW_COUNT    = 13
   IMPORT_BATCH_SIZE = 1000
   MAX_ERROR_COUNT   = 100
 
