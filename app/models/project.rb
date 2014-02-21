@@ -271,7 +271,7 @@ class Project < ActiveRecord::Base
     stage_values = split_large_array(Observation::STAGE_OPTIONS_VALUES)
 
     data = {
-      'Species guess'            => ['#Lorem', 'Ipsum', 'Dolor'],
+      'Species guess'            => ['#Lorem', '#Ipsum', '#Dolor'],
       'Observation Date'         => ['2013-01-01', '2013-01-01 09:10:11', '2013-01-01T14:40:33'],
       'Description'              => ['Description of observation'],
       'Location'                 => ['Wellington City', 'Karori'],
