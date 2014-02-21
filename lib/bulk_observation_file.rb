@@ -65,37 +65,41 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     errors = []
 
     # Parse the entire observation file looking for possible errors.
-    rows = CSV.parse(open(@observation_file, 'r:iso-8859-1:utf-8').read)
+    begin
+      rows = CSV.parse(open(@observation_file, 'r:iso-8859-1:utf-8').read)
 
-    # Skip the header row - this is very clumsy, but using the built in
-    # header skipping doesn't allow the use of Array.in_groups_of below
-    # and causes issues with the field UTF-8 encoding above.
-    rows.shift
+      # Skip the header row - this is very clumsy, but using the built in
+      # header skipping doesn't allow the use of Array.in_groups_of below
+      # and causes issues with the field UTF-8 encoding above.
+      rows.shift
 
-    # Iterate over each row
-    rows.each do |row|
-      unless skip_row?(row)
-        # Check that the number of CSV fields is correct.
-        errors << BulkObservationException.new("Column count is not correct (#{@custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count + 1) if row.count != (@custom_field_count + BASE_ROW_COUNT)
+      # Iterate over each row
+      rows.each do |row|
+        unless skip_row?(row)
+          # Check that the number of CSV fields is correct.
+          errors << BulkObservationException.new("Column count is not correct (#{@custom_field_count + BASE_ROW_COUNT} expected, #{row.count} found)", row_count + 1) if row.count != (@custom_field_count + BASE_ROW_COUNT)
 
-        # Look for the species and flag it if it's not found.
-        taxon = Taxon.single_taxon_for_name(row[0])
-        errors << BulkObservationException.new("Species not found: #{row[0]}", row_count + 1, [], 'species_not_found') if taxon.nil?
+          # Look for the species and flag it if it's not found.
+          taxon = Taxon.single_taxon_for_name(row[0])
+          errors << BulkObservationException.new("Species not found: #{row[0]}", row_count + 1, [], 'species_not_found') if taxon.nil?
 
-        # Check the validity of the observation
-        obs = new_observation(row)
-        errors << BulkObservationException.new('Observation is not valid', row_count + 1, obs.errors) unless obs.valid?
+          # Check the validity of the observation
+          obs = new_observation(row)
+          errors << BulkObservationException.new('Observation is not valid', row_count + 1, obs.errors) unless obs.valid?
+        end
+
+        # Increment the row count.
+        row_count = row_count + 1
+
+        # Stop if we have reached our max error count
+        break if errors.count >= MAX_ERROR_COUNT
       end
 
-      # Increment the row count.
-      row_count = row_count + 1
-
-      # Stop if we have reached our max error count
-      break if errors.count >= MAX_ERROR_COUNT
+      raise BulkObservationException.new("We tried to upload your spreadsheet called #{File.basename(@observation_file)} to #{CONFIG.site_name} but it didn't work. Please fix the following problem(s) and try again.", nil, errors) if errors.count > 0
+      raise BulkObservationException.new("The observation file '#{File.basename(@observation_file)}' was empty.") if row_count == 1
+    rescue
+      raise BulkObservationException.new("We tried to upload your spreadsheet called '#{File.basename(@observation_file)}' to #{CONFIG.site_name} but it didn't work. There's a quirk in your file that doesn't match any of our regular errors but has prevented your observations uploading. Please have another look and see if you can see anything out of place. Some common errors are listed at #{CONFIG.site_url}/pages/bulk_import</p><p>If you cannot work it out, please email your spreadsheet to #{CONFIG.help_email} and we'll do our best to get it working for you.".html_safe)
     end
-
-    raise BulkObservationException.new("We tried to upload your spreadsheet called #{File.basename(@observation_file)} to #{CONFIG.site_name} but it didn't work. Please fix the following problem(s) and try again.", nil, errors) if errors.count > 0
-    raise BulkObservationException.new("The observation file '#{File.basename(@observation_file)}' was empty.") if row_count == 0
   end
 
   # Import the observations in the file, and add to the specified project.
@@ -216,25 +220,27 @@ class BulkObservationFile < Struct.new(:observation_file, :project_id, :coord_sy
     field_options = {}
     errors = {}
     exception.errors.each do |e|
-      if e.errors.is_a?(ActiveModel::Errors)
-        e.errors.each do |field, error|
-          errors[field] ||= {}
-          full_error = e.errors.full_message(field, error)
-          errors[field][full_error] ||= []
-          errors[field][full_error] << e.row_count
-          field_options[field] = Observation.field_allowed_values(field)
-        end
-      elsif !e.tag.nil?
-        e.errors.each do |error|
-          errors[e.tag] ||= {}
-          errors[e.tag][error] ||= []
-          errors[e.tag][error] << e.row_count
-        end
-      else
-        e.errors.each do |error|
-          errors['base'] ||= {}
-          errors['base'][error] ||= []
-          errors['base'][error] << e.row_count
+      unless e.is_a?(String)
+        if e.errors.is_a?(ActiveModel::Errors)
+          e.errors.each do |field, error|
+            errors[field] ||= {}
+            full_error = e.errors.full_message(field, error)
+            errors[field][full_error] ||= []
+            errors[field][full_error] << e.row_count
+            field_options[field] = Observation.field_allowed_values(field)
+          end
+        elsif !e.tag.nil?
+          e.errors.each do |error|
+            errors[e.tag] ||= {}
+            errors[e.tag][error] ||= []
+            errors[e.tag][error] << e.row_count
+          end
+        else
+          e.errors.each do |error|
+            errors['base'] ||= {}
+            errors['base'][error] ||= []
+            errors['base'][error] << e.row_count
+          end
         end
       end
     end
