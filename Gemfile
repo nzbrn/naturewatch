@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
 gem 'rails'
-gem 'rake', '0.8.7' # ubuntu seems to freak with the most recent version
+gem 'rake', '0.8.7'
 
 gem 'aasm'
 gem 'addressable', :require => 'addressable/uri'
@@ -23,7 +23,7 @@ gem 'devise_suspendable'
 gem 'dynamic_form'
 gem 'exifr'
 gem 'faker'
-gem 'flickraw'
+gem 'flickraw', "~> 0.9.8"
 gem "friendly_id", "~> 4.0.1"
 gem 'gdata', :git => 'git://github.com/dwaite/gdata.git'
 gem 'geoplanet'
@@ -34,7 +34,6 @@ gem 'irwi', :git => 'git://github.com/alno/irwi.git'
 gem 'json', "~> 1.7.7"
 gem 'koala'
 gem 'mail_view', :git => 'https://github.com/37signals/mail_view.git'
-gem 'mechanize'
 gem 'memcache-client'
 gem 'mocha'
 gem 'mobile-fu', :git => 'https://github.com/kueda/mobile-fu.git'
