@@ -355,6 +355,9 @@
     });
     
     $(controls).append($sourceWrapper);
+    if ($sourceWrapper.find('select').length == 0) { 
+      $sourceWrapper.hide()
+    }
     $(controls).append($searchWrapper, page, prev, next);
     $(controls).append($('<div></div>').css({
       height: 0, 
@@ -364,8 +367,9 @@
     
     $(wrapper).append(controls);
     
-    if (options.baseURL.match(/local_photo/)) {
+    if (options.baseURL && options.baseURL.match(/local_photo/) && $sourceWrapper.find('select').length != 0) {
       $(wrapper).find('.photoSelectorControls .button, .photoSelectorControls .text').hide();
+      $sourceWrapper.show();
     }
     
     // Bind button clicks to search photos
