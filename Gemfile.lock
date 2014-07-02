@@ -230,7 +230,7 @@ GEM
       rack
     omniauth-facebook (1.4.1)
       omniauth-oauth2 (~> 1.1.0)
-    omniauth-flickr (0.0.11)
+    omniauth-flickr (0.0.15)
       omniauth-oauth (~> 1.0)
     omniauth-oauth (1.0.1)
       oauth
@@ -388,7 +388,7 @@ DEPENDENCIES
   nokogiri
   objectify-xml
   omniauth-facebook
-  omniauth-flickr
+  omniauth-flickr (~> 0.0.15)
   omniauth-openid
   omniauth-twitter
   paperclip

@@ -40,7 +40,7 @@ gem 'mobile-fu', :git => 'https://github.com/kueda/mobile-fu.git'
 gem 'nokogiri'
 gem 'omniauth-twitter'
 gem 'omniauth-facebook'
-gem 'omniauth-flickr'
+gem 'omniauth-flickr', "~> 0.0.15"
 gem 'omniauth-openid'
 gem 'objectify-xml', :require => 'objectify_xml'
 gem 'paperclip'
