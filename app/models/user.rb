@@ -401,8 +401,8 @@ class User < ActiveRecord::Base
     autogen_login = User.suggest_login(email.split('@').first) if autogen_login.blank? && !email.blank?
     autogen_login = User.suggest_login('naturalist') if autogen_login.blank?
     autogen_pw = SecureRandom.hex(6) # autogenerate a random password (or else validation fails)
-    fn = auth_info["user_info"]["first_name"] || auth_info["user_info"]["name"].split[0]
-    ln = auth_info["user_info"]["last_name"] || auth_info["user_info"]["name"].split[1]
+    fn = auth_info["info"]["first_name"] || auth_info["info"]["name"].split[0]
+    ln = auth_info["info"]["last_name"] || auth_info["info"]["name"].split[1]
     u = User.new(
       :login => autogen_login,
       :email => email,

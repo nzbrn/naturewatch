@@ -225,7 +225,7 @@ GEM
     objectify-xml (0.2.3)
       activesupport
       nokogiri
-    omniauth (1.1.1)
+    omniauth (1.2.1)
       hashie (~> 1.2)
       rack
     omniauth-facebook (1.4.1)
